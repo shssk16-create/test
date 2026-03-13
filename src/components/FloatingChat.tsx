@@ -37,7 +37,7 @@ export default function FloatingChat() {
         {isOpen && (
           <motion.div initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.9 }} className="absolute bottom-16 right-0 w-[90vw] max-w-[350px] bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col h-[450px]">
             <div className="bg-[#15110E] p-4 flex justify-between items-center text-white">
-              <div className="flex items-center gap-2"><Bot className="text-[#A1824A]"/> <span className="font-bold text-sm">Hala - AI Agent</span></div>
+              <div className="flex items-center gap-2"><Bot className="text-[#A1824A]"/> <span className="font-bold text-sm">المساعد الذكي</span></div>
               <button onClick={() => setIsOpen(false)} className="hover:text-[#A1824A]"><X size={20}/></button>
             </div>
             <div className="flex-1 p-4 overflow-y-auto bg-stone-50 flex flex-col gap-3">
