@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Madani Arabic';
+  src: local('Madani Arabic'), url('https://fonts.cdnfonts.com/s/90089/MadaniArabic-Regular.woff') format('woff');
+  font-display: swap;
+}
+
+html, body {
+  background-color: #F9F8F6;
+  color: #261F1B;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+.glass-nav {
+  background: rgba(249, 248, 246, 0.8);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(38, 31, 27, 0.05);
+}
+
+.logo-grid-item {
+  filter: grayscale(100%) contrast(150%) brightness(0.5);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.logo-grid-item:hover {
+  filter: grayscale(0%) contrast(100%) brightness(1);
+  transform: translateY(-5px);
+}
