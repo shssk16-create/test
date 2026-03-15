@@ -17,8 +17,8 @@ export default function FloatingChat() {
       const data = await res.json();
       let botTxt = "تم الاستلام بنجاح.";
       if (typeof data === 'string') botTxt = data;
-      else if (Array.isArray(data) && data[0]) botTxt = data[0].output || data[0].response || data[0].text || JSON.stringify(data[0]);
-      else if (typeof data === 'object') botTxt = data.output || data.response || data.text || JSON.stringify(data);
+      else if (Array.isArray(data) && data[0]) botTxt = data[0].reply || data[0].output || data[0].response || data[0].text || JSON.stringify(data[0]);
+      else if (typeof data === 'object') botTxt = data.reply || data.output || data.response || data.text || JSON.stringify(data);
       setMsg(p => [...p, { r: 'b', t: botTxt }]);
     } catch (e) { setMsg(p => [...p, { r: 'b', t: "عذراً، الخادم لا يستجيب." }]); } finally { setLoad(false); }
   };
