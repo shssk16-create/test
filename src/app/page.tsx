@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import FloatingChat from "@/components/FloatingChat";
-import { Code2, Phone, MapPin, Search, Bot, Database, LayOut, Cpu, Sparkles, TrendingUp, Award, Clock } from "lucide-react";
+import { Code2, Phone, MapPin, Search, Bot, Database, Layout, Cpu, Sparkles, TrendingUp, Award, Clock } from "lucide-react";
 import Link from "next/link";
 
 export default function GlobalPortfolio() {
