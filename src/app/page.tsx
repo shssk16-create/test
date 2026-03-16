@@ -32,8 +32,8 @@ export default function GlobalPortfolio() {
       <section className="flex-1 flex flex-col items-center justify-center px-6 text-center z-10 -mt-10">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} className="max-w-4xl mx-auto flex flex-col items-center">
           <div className="px-5 py-2 bg-[#A1824A]/10 rounded-full border border-[#A1824A]/30 mb-8 text-xs font-black tracking-widest flex items-center gap-2 text-[#A1824A] uppercase"><Sparkles size={14} /> {isAr ? 'مطور حلول ذكاء اصطناعي وبنية سحابية' : 'AI & Cloud Solutions Architect'}</div>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-tight mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white to-stone-500 drop-shadow-2xl">{isAr ? "سالمين خنبري." : "Salmeen Khanbri."}</h1>
-          <p className="text-stone-400 font-medium text-lg md:text-xl mb-12 max-w-2xl leading-relaxed">{isAr ? "أبني منصات رقمية متكاملة. يمكنك تصفح معرض أعمالي بالأسفل، أو التحدث مباشرة مع مساعدي الذكي (الذي بنيته بيدي) ليجيب على كافة استفساراتك حول خبراتي وتقنياتي." : "Building comprehensive digital platforms, from cloud architecture to UI design and SEO-optimized content."}</p>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[1.4] py-3 mb-4 text-transparent bg-clip-text bg-gradient-to-b from-white to-stone-400 drop-shadow-2xl overflow-visible">{isAr ? "سالمين خنبري." : "Salmeen Khanbri."}</h1>
+          <p className="text-stone-400 font-medium text-lg md:text-xl mb-12 max-w-2xl leading-[1.8]">{isAr ? "أبني منصات رقمية متكاملة. يمكنك تصفح معرض أعمالي بالأسفل، أو التحدث مباشرة مع مساعدي الذكي (الذي بنيته بيدي) ليجيب على كافة استفساراتك حول خبراتي وتقنياتي." : "Building comprehensive digital platforms. Explore my portfolio below or chat with my custom-built AI assistant."}</p>
           <div className="flex flex-wrap items-center justify-center gap-6">
             <Link href="/portfolio" className="relative group px-8 py-4 rounded-full font-black text-sm flex items-center gap-3 overflow-hidden bg-white text-black transition-all hover:scale-105">
               <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#A1824A] to-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
@@ -43,8 +43,12 @@ export default function GlobalPortfolio() {
         </motion.div>
       </section>
 
-      <section className="py-10 px-6 border-t border-white/5 bg-black/20 backdrop-blur-sm z-10">
-        <div className="max-w-7xl mx-auto flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700">{logos.map((u, i) => (<img key={i} src={u} className="h-7 max-w-[100px] object-contain drop-shadow-lg" />))}</div>
+      <section className="py-10 px-6 border-t border-white/5 bg-black/40 backdrop-blur-md z-10">
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-center items-center gap-10 md:gap-20">
+          {logos.map((u, i) => (
+            <img key={i} src={u} className="h-9 md:h-12 max-w-[130px] object-contain opacity-70 hover:opacity-100 hover:scale-110 transition-all duration-500 drop-shadow-[0_0_10px_rgba(255,255,255,0.05)]" />
+          ))}
+        </div>
       </section>
       <FloatingChat />
     </main>

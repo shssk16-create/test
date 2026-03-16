@@ -32,7 +32,7 @@ export default function Portfolio() {
 
       <section className="pt-24 pb-16 px-6 max-w-7xl mx-auto text-center relative z-10">
         <div className="inline-flex items-center gap-2 px-5 py-2 bg-[#A1824A]/10 rounded-full border border-[#A1824A]/20 mb-6 text-xs font-black text-[#A1824A] uppercase tracking-widest"><Sparkles size={14} /> المعرض الفاخر 3D</div>
-        <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-stone-500">أعمال تتحدث <span className="text-[#A1824A]">بلغة الأرقام.</span></h1>
+        <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-stone-400 leading-[1.4] py-4 overflow-visible">أعمال تتحدث <span className="text-[#A1824A]">بلغة الأرقام.</span></h1>
         <div className="flex flex-wrap justify-center gap-3 mt-12">
           {filters.map(f => (
             <button key={f.id} onClick={() => setFilter(f.id)} className={`px-6 py-3 rounded-full text-xs font-black transition-all duration-300 border ${filter === f.id ? 'bg-[#A1824A] text-white border-[#A1824A] shadow-[0_0_20px_rgba(161,130,74,0.4)]' : 'bg-transparent text-stone-500 border-white/10 hover:border-white/30 hover:text-white'}`}>{f.label}</button>
@@ -54,9 +54,9 @@ export default function Portfolio() {
                       </div>
                       <div className="w-12 h-12 rounded-2xl bg-[#A1824A]/10 flex items-center justify-center border border-[#A1824A]/20 group-hover:bg-[#A1824A] transition-colors"><Icon size={20} className="text-[#A1824A] group-hover:text-white" /></div>
                     </div>
-                    <h3 className="text-3xl font-black mb-2 text-white drop-shadow-md" dir="ltr">{p.title}</h3>
+                    <h3 className="text-3xl font-black mb-2 text-white drop-shadow-md leading-[1.4] py-2 overflow-visible" dir="ltr">{p.title}</h3>
                     <p className="text-[#A1824A] font-black text-[10px] uppercase tracking-widest mb-6" dir="ltr">{p.role}</p>
-                    <p className="text-stone-400 text-sm leading-relaxed mb-8 flex-1">{p.desc}</p>
+                    <p className="text-stone-400 text-sm leading-[1.8] mb-8 flex-1">{p.desc}</p>
                     <div className="flex flex-wrap gap-2 mb-8" dir="ltr">
                       {p.tech.map((t, i) => <span key={i} className="px-3 py-1.5 bg-black/50 text-stone-300 text-[10px] font-bold rounded-lg border border-white/5 shadow-inner">{t}</span>)}
                     </div>
