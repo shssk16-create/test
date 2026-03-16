@@ -32,7 +32,7 @@ export default function Portfolio() {
 
       <section className="pt-24 pb-16 px-6 max-w-7xl mx-auto text-center relative z-10">
         <div className="inline-flex items-center gap-2 px-5 py-2 bg-[#A1824A]/10 rounded-full border border-[#A1824A]/20 mb-6 text-xs font-black text-[#A1824A] uppercase tracking-widest"><Sparkles size={14} /> المعرض الفاخر 3D</div>
-        <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-stone-400 leading-[1.4] py-4 overflow-visible">أعمال تتحدث <span className="text-[#A1824A]">بلغة الأرقام.</span></h1>
+        <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-stone-400 leading-loose pb-8 pt-2 overflow-visible">أعمال تتحدث <span className="text-[#A1824A]">بلغة الأرقام.</span></h1>
         <div className="flex flex-wrap justify-center gap-3 mt-12">
           {filters.map(f => (
             <button key={f.id} onClick={() => setFilter(f.id)} className={`px-6 py-3 rounded-full text-xs font-black transition-all duration-300 border ${filter === f.id ? 'bg-[#A1824A] text-white border-[#A1824A] shadow-[0_0_20px_rgba(161,130,74,0.4)]' : 'bg-transparent text-stone-500 border-white/10 hover:border-white/30 hover:text-white'}`}>{f.label}</button>
