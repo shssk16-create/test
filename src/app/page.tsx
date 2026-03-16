@@ -33,7 +33,8 @@ export default function GlobalPortfolio() {
       <section className="flex-1 flex flex-col items-center justify-center px-6 text-center z-10 -mt-10">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} className="max-w-4xl mx-auto flex flex-col items-center">
           <div className="px-5 py-2 bg-[#A1824A]/10 rounded-full border border-[#A1824A]/30 mb-8 text-xs font-black tracking-widest flex items-center gap-2 text-[#A1824A] uppercase"><Sparkles size={14} /> {isAr ? 'مطور حلول ذكاء اصطناعي وبنية سحابية' : 'AI & Cloud Solutions Architect'}</div>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-loose pb-8 pt-2 mb-4 text-transparent bg-clip-text bg-gradient-to-b from-white to-stone-400 drop-shadow-2xl overflow-visible">{isAr ? "سالمين خنبري." : "Salmeen Khanbri."}</h1>
+          {/* Fix applied here: leading-[1.8] and pb-10 forces the WebKit mask to fully reveal the dots of Yaa */}
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[1.8] pb-10 pt-4 mb-2 text-transparent bg-clip-text bg-gradient-to-b from-white to-stone-400 drop-shadow-2xl overflow-visible">{isAr ? "سالمين خنبري." : "Salmeen Khanbri."}</h1>
           <p className="text-stone-400 font-medium text-lg md:text-xl mb-12 max-w-2xl leading-[1.8]">{isAr ? "أبني منصات رقمية متكاملة. يمكنك تصفح معرض أعمالي من الأعلى، أو التحدث مباشرة مع مساعدي الذكي (الذي بنيته بيدي) ليجيب على كافة استفساراتك حول خبراتي وتقنياتي." : "Building comprehensive digital platforms. Explore my portfolio from the menu above or chat with my custom-built AI assistant."}</p>
           <div className="flex flex-wrap items-center justify-center gap-6">
             <a href="https://wa.me/966503026795" target="_blank" rel="noopener noreferrer" className="relative group px-8 py-4 rounded-full font-black text-sm flex items-center gap-3 overflow-hidden bg-white text-black transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
@@ -46,8 +47,9 @@ export default function GlobalPortfolio() {
 
       <section className="py-10 px-6 border-t border-white/5 bg-black/40 backdrop-blur-md z-10">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-center items-center gap-10 md:gap-20">
+          {/* Fix applied here: filter brightness-0 invert makes all logos pure white for ultimate contrast */}
           {logos.map((u, i) => (
-            <img key={i} src={u} className="h-9 md:h-12 max-w-[130px] object-contain opacity-70 hover:opacity-100 hover:scale-110 transition-all duration-500 drop-shadow-[0_0_10px_rgba(255,255,255,0.05)]" />
+            <img key={i} src={u} className="h-8 md:h-11 max-w-[130px] object-contain filter brightness-0 invert opacity-50 hover:opacity-100 hover:scale-110 transition-all duration-500 drop-shadow-lg" />
           ))}
         </div>
       </section>
