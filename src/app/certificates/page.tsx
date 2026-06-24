@@ -258,7 +258,7 @@ export function CertificateCard({
                 <h3 className={`text-xs md:text-sm font-bold leading-[1.7] mb-2 ${isDark ? 'text-white' : 'text-[#15110E]'} ${isAr ? 'text-right' : 'text-left'}`}>
                   {name}
                 </h3>
-                <p className={`text-[9.5px] leading-[1.8] font-sans ${isDark ? 'text-stone-455' : 'text-stone-600'} ${isAr ? 'text-right' : 'text-left'}`}>
+                <p className={`text-[9.5px] leading-[1.8] font-sans ${isDark ? 'text-stone-400' : 'text-stone-600'} ${isAr ? 'text-right' : 'text-left'}`}>
                   {isAr ? "شهادة مهنية معتمدة تثبت الكفاءة الهندسية وتطوير الحلول البرمجية والسحابية المتطورة." : "Verified professional credential validating software engineering and cloud solutions competency."}
                 </p>
 

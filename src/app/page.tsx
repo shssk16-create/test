@@ -95,7 +95,7 @@ function GlobalPortfolio() {
     async function fetchHeroAndLogos() {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
       try {
-        const heroRes = await fetch(`${apiBase}/api/heroes`, { cache: 'no-store' });
+        const heroRes = await fetch(`${apiBase}/api/heroes?owner=salmeen`, { cache: 'no-store' });
         if (heroRes.ok) {
           const heroJson = await heroRes.json();
           if (heroJson.data && Array.isArray(heroJson.data) && heroJson.data.length > 0) {
@@ -116,7 +116,7 @@ function GlobalPortfolio() {
       }
 
       try {
-        const logosRes = await fetch(`${apiBase}/api/logos`, { cache: 'no-store' });
+        const logosRes = await fetch(`${apiBase}/api/logos?owner=salmeen`, { cache: 'no-store' });
         if (logosRes.ok) {
           const logosJson = await logosRes.json();
           if (logosJson.data && Array.isArray(logosJson.data) && logosJson.data.length > 0) {
