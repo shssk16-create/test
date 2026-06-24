@@ -1,0 +1,3 @@
+ALTER TABLE posts ADD COLUMN summary TEXT;
+
+ALTER TABLE posts ADD COLUMN tags TEXT;

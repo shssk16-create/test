@@ -10,7 +10,9 @@ module.exports = {
       },
       fontFamily: {
         heading: ['"Madani Arabic"', 'sans-serif'],
-        body: ['var(--font-tajawal)', 'sans-serif'],
+        body: ['var(--font-alexandria)', 'var(--font-tajawal)', 'sans-serif'],
+        sans: ['var(--font-alexandria)', 'var(--font-tajawal)', 'sans-serif'],
+        alexandria: ['var(--font-alexandria)', 'sans-serif'],
       }
     },
   },

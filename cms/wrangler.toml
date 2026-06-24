@@ -1,0 +1,31 @@
+name = "cloudflare-cms-worker"
+main = "worker/index.ts"
+compatibility_date = "2024-04-03"
+
+# D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "cms-db"
+database_id = "c158c2b0-8436-4b59-a53a-0d1a252a0e0b"
+migrations_dir = "migrations"
+
+# KV Namespace Binding
+[[kv_namespaces]]
+binding = "KV"
+id = "e7b9fd1123294838bc0ff178e825d55d"
+
+# R2 Bucket Binding
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "cms-media"
+
+# Durable Object Bindings
+[[durable_objects.bindings]]
+name = "CMS_STATE"
+class_name = "CmsState"
+
+# Durable Object Migrations
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["CmsState"]
+

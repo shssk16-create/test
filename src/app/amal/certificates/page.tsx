@@ -44,13 +44,13 @@ export interface CertificateProps {
 
 const fallbackPrimaryCert: CertificateProps = {
   id: "cert-primary",
-  name_ar: "وثيقة التخرج الأساسية في تقنية البرمجيات",
-  name_en: "Primary Graduate Diploma in Software Technology",
-  issuer_ar: "الكلية التقنية",
-  issuer_en: "Technical College",
-  date: "2026-03-01",
+  name_ar: "شهادة تخرج برمجيات",
+  name_en: "Software Graduation Certificate",
+  issuer_ar: "الجامعة الوطنية",
+  issuer_en: "National University",
+  date: "2026-06-01",
   credential_url: "",
-  image: "https://aurateam3.com/wp-content/uploads/2026/03/وثائق-التخرج-طلاب-الكلية-46-_page-0001.webp",
+  image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
   featured: true,
   skills: ["Software Engineering", "Cloud Computing", "Web Architecture", "Databases", "Distributed Systems"],
   description_ar: "تم الحصول على هذه الدرجة العلمية في تخصص تقنية البرمجيات وأنظمة الويب المتكاملة مع التركيز على بناء البنى السحابية وتكامل الأنظمة وريادة الأعمال الرقمية.",
@@ -59,140 +59,7 @@ const fallbackPrimaryCert: CertificateProps = {
   degree_level_en: "Degree Level: Higher Software Diploma"
 };
 
-const fallbackOtherCerts: CertificateProps[] = [
-  {
-    id: "cert-coursera-1",
-    name_ar: "أخصائي أنظمة الذكاء الاصطناعي التوليدي",
-    name_en: "Generative AI Systems Specialist",
-    issuer_ar: "كورسيرا",
-    issuer_en: "Coursera",
-    date: "2026-03-02",
-    credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/Coursera-H3AKC1QMLIRA_page-0001.webp",
-    featured: false,
-    skills: ["Generative AI", "LLM Alignment", "AI Agents"]
-  },
-  {
-    id: "cert-coursera-2",
-    name_ar: "أسس البنية التحتية للحوسبة السحابية",
-    name_en: "Cloud Architecture Foundations",
-    issuer_ar: "كورسيرا",
-    issuer_en: "Coursera",
-    date: "2026-03-03",
-    credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/Coursera-FDBD5M3X44NP_page-0001.webp",
-    featured: false,
-    skills: ["Cloud Architecture", "AWS", "Infrastructure"]
-  },
-  {
-    id: "cert-coursera-3",
-    name_ar: "أوركسترا وكلاء الذكاء الاصطناعي للمؤسسات",
-    name_en: "Enterprise Multi-Agent Orchestration",
-    issuer_ar: "كورسيرا",
-    issuer_en: "Coursera",
-    date: "2026-03-04",
-    credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/Coursera-BN5Z65E8BW06_page-0001-1.webp",
-    featured: false,
-    skills: ["Multi-Agent", "LangGraph", "Orchestration"]
-  },
-  {
-    id: "cert-agent-explorer",
-    name_ar: "شهادة مستكشف وكلاء الذكاء الاصطناعي",
-    name_en: "AI Agent Explorer Certification",
-    issuer_ar: "منظمة مستكشف الوكلاء",
-    issuer_en: "Agent Explorer Org",
-    date: "2026-03-05",
-    credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/certificate-agent-explorer_page-0001.webp",
-    featured: false,
-    skills: ["AI Agents", "Automations", "Python"]
-  },
-  {
-    id: "cert-mpdf-4",
-    name_ar: "مهندس نظم الميكروفرونت إند",
-    name_en: "Micro-Frontend Systems Engineer",
-    issuer_ar: "مجموعة mpdf الهندسية",
-    issuer_en: "Mpdf Engineering Group",
-    date: "2026-03-06",
-    credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/mpdf-4_page-0001-1.webp",
-    featured: false,
-    skills: ["Micro-Frontends", "Module Federation", "React"]
-  },
-  {
-    id: "cert-other-1",
-    name_ar: "شهادة النشر السحابي المتقدم",
-    name_en: "Advanced Cloud Deployments Certificate",
-    issuer_ar: "الشركاء الأكاديميون والتقنيون",
-    issuer_en: "Academic & Tech Partners",
-    date: "2026-03-07",
-    credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/1761323074618.webp",
-    featured: false,
-    skills: ["Cloud Deployments", "CI/CD", "Docker"]
-  },
-  {
-    id: "cert-other-2",
-    name_ar: "أخصائي بنية تحتية لـ NVIDIA NIM",
-    name_en: "NVIDIA NIM Infrastructure Specialist",
-    issuer_ar: "شريك بيتا لـ NVIDIA NIM",
-    issuer_en: "NVIDIA NIM Beta Partner",
-    date: "2026-03-08",
-    credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/1748694369861.webp",
-    featured: false,
-    skills: ["NVIDIA NIM", "GPU Inference", "Docker"]
-  },
-  {
-    id: "cert-other-3",
-    name_ar: "الدرجة الأساسية في التعلم العميق",
-    name_en: "Deep Learning Foundations Degree",
-    issuer_ar: "الشركاء الأكاديميون والتقنيون",
-    issuer_en: "Academic & Tech Partners",
-    date: "2026-03-09",
-    credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/1739189774385.webp",
-    featured: false,
-    skills: ["Deep Learning", "PyTorch", "Neural Networks"]
-  },
-  {
-    id: "cert-other-4",
-    name_ar: "شهادة محاذاة نماذج اللغة الكبيرة للّكنات المحلية",
-    name_en: "Saudi Dialect LLM Alignment Certification",
-    issuer_ar: "مجموعة أبحاث علام",
-    issuer_en: "ALLaM Research Cohort",
-    date: "2026-03-10",
-    credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/1741152507855.webp",
-    featured: false,
-    skills: ["LLM Alignment", "Arabic NLP", "Fine-Tuning"]
-  },
-  {
-    id: "cert-other-5",
-    name_ar: "مهندس عمليات قواعد البيانات غير الخادمة",
-    name_en: "Serverless Database Operations Architect",
-    issuer_ar: "مجموعة شركاء Cloudflare D1",
-    issuer_en: "Cloudflare D1 Partner Group",
-    date: "2026-03-11",
-    credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/1742330177160.webp",
-    featured: false,
-    skills: ["Cloudflare D1", "Serverless DB", "Wrangler"]
-  },
-  {
-    id: "cert-other-6",
-    name_ar: "أخصائي البرمجيات الوسيطة عبر Hono.js",
-    name_en: "Hono.js Cloud Middleware Specialist",
-    issuer_ar: "تحالف البرمجيات الوسيطة التقنية",
-    issuer_en: "Technical Middleware Alliance",
-    date: "2026-03-12",
-    credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/1744763478103.webp",
-    featured: false,
-    skills: ["Hono.js", "Edge Middleware", "Cloudflare Workers"]
-  }
-];
+const fallbackOtherCerts: CertificateProps[] = [];
 
 export function CertificateCard({
   name_ar,
@@ -221,17 +88,17 @@ export function CertificateCard({
           <div
             className={`flex flex-col h-full backdrop-blur-md rounded-3xl overflow-visible transition-all duration-500 select-none border active:scale-[0.98] ${
               isDark 
-                ? 'bg-[#0a0c10]/90 border-white/5 text-[#E8EDF2] hover:border-[#A1824A]/50 shadow-[0_8px_30px_rgba(0,0,0,0.2)]' 
-                : 'bg-white border-[#15110E]/15 text-[#15110E] shadow-sm hover:border-[#A1824A]/50'
+                ? 'bg-[#2C3947]/90 border-white/5 text-[#E8EDF2] hover:border-[#C2A56D]/50 shadow-[0_8px_30px_rgba(0,0,0,0.2)]' 
+                : 'bg-white border-[#547A95]/20 text-[#2C3947] shadow-sm hover:border-[#C2A56D]/50'
             }`}
           >
             <div
               className="relative flex items-center justify-center h-[90px] w-full shrink-0 overflow-hidden border-b transition-all duration-500"
               style={{ 
                 background: isDark 
-                  ? `radial-gradient(circle at center, rgba(161,130,74,0.15) 0%, #0a0c10 100%)` 
-                  : `radial-gradient(circle at center, rgba(161,130,74,0.08) 0%, #F9F8F6 100%)`,
-                borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(21,17,14,0.08)'
+                  ? `radial-gradient(circle at center, rgba(194,165,109,0.15) 0%, #2C3947 100%)` 
+                  : `radial-gradient(circle at center, rgba(194,165,109,0.08) 0%, #E8EDF2 100%)`,
+                borderColor: isDark ? 'rgba(84,122,149,0.2)' : 'rgba(84,122,149,0.1)'
               }}
             >
               {image && (
@@ -241,7 +108,7 @@ export function CertificateCard({
                 />
               )}
               <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:14px_14px]"></div>
-              <Award size={30} className={`drop-shadow-[0_4px_10px_rgba(161,130,74,0.3)] ${isDark ? 'text-white' : 'text-[#A1824A]'} relative z-10`} />
+              <Award size={30} className={`drop-shadow-[0_4px_10px_rgba(194,165,109,0.3)] ${isDark ? 'text-white' : 'text-[#C2A56D]'} relative z-10`} />
             </div>
 
             <div className="flex flex-col flex-grow p-4 md:p-5 justify-between">
@@ -252,7 +119,7 @@ export function CertificateCard({
                   }`}>{issuer}</span>
                   <span className={`text-[8px] font-bold ${isDark ? 'text-stone-500' : 'text-stone-400'}`} dir="ltr">{date}</span>
                 </div>
-                <h3 className={`text-xs md:text-sm font-bold leading-[1.7] mb-2 ${isDark ? 'text-white' : 'text-[#15110E]'} ${isAr ? 'text-right' : 'text-left'}`}>
+                <h3 className={`text-xs md:text-sm font-bold leading-[1.7] mb-2 ${isDark ? 'text-white' : 'text-[#2C3947]'} ${isAr ? 'text-right' : 'text-left'}`}>
                   {name}
                 </h3>
                 <p className={`text-[9.5px] leading-[1.8] font-sans ${isDark ? 'text-stone-400' : 'text-stone-600'} ${isAr ? 'text-right' : 'text-left'}`}>
@@ -286,7 +153,7 @@ export function CertificateCard({
 
               <div className="flex items-center justify-between pt-3 border-t border-stone-200/40 dark:border-white/5 mt-4">
                 <span className="text-stone-400 text-[8px] font-black uppercase tracking-wider">{isAr ? 'عرض' : 'VIEW'}</span>
-                <span className={`text-[9px] font-bold italic text-[#A1824A]/70`}>{isAr ? 'مرر لرؤية الصورة 🫵' : 'Hover to flip 🫵'}</span>
+                <span className={`text-[9px] font-bold italic ${isDark ? 'text-[#C2A56D]/70' : 'text-[#C2A56D]/70'}`}>{isAr ? 'مرر لرؤية الصورة 🫵' : 'Hover to flip 🫵'}</span>
               </div>
             </div>
           </div>
@@ -304,13 +171,13 @@ export function CertificateCard({
               backgroundPosition: 'top center'
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-[#A1824A]/15 via-[#0a0c10]/70 to-[#0a0c10]/95 z-0"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-[#C2A56D]/15 via-[#2C3947]/70 to-[#2C3947]/95 z-0"></div>
             
             <div className="relative z-10 flex flex-col gap-3">
               <div className="flex justify-between items-start">
                 <span className="px-2 py-0.5 bg-black/40 backdrop-blur-md text-white text-[8px] font-bold rounded border border-white/10 uppercase">{issuer}</span>
                 {featured && (
-                  <span className="px-2.5 py-0.5 bg-[#A1824A] text-black text-[8px] font-black rounded-full border border-yellow-300/20 shadow-md">
+                  <span className="px-2.5 py-0.5 bg-[#C2A56D] text-black text-[8px] font-black rounded-full border border-yellow-300/20 shadow-md">
                     {isAr ? 'شهادة أساسية' : 'PRIMARY'}
                   </span>
                 )}
@@ -320,7 +187,7 @@ export function CertificateCard({
               
               <div className="flex items-center justify-between pt-2 border-t border-white/10">
                 {credential_url ? (
-                  <a href={credential_url} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 bg-[#A1824A] text-black text-[9px] font-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-md" onClick={(e) => e.stopPropagation()}>{isAr ? 'التحقق' : 'Verify'}</a>
+                  <a href={credential_url} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 bg-[#C2A56D] text-black text-[9px] font-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-md" onClick={(e) => e.stopPropagation()}>{isAr ? 'التحقق' : 'Verify'}</a>
                 ) : (
                   <span className="text-stone-400 text-[8.5px] font-bold">{date}</span>
                 )}
@@ -339,7 +206,10 @@ export function CertificateCard({
   );
 }
 
-export default function Certificates() {
+export default function AmalCertificates() {
+  const isAmalDeploy = process.env.NEXT_PUBLIC_OWNER === 'amal';
+  const basePrefix = isAmalDeploy ? "" : "/amal";
+
   const [lang, setLang] = useState<'ar'|'en'>('ar');
   const [theme, setTheme] = useState<'dark'|'light'>('dark');
   const [loading, setLoading] = useState(true);
@@ -362,7 +232,7 @@ export default function Certificates() {
     if (mounted) {
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
       document.documentElement.lang = lang;
-      document.title = lang === 'ar' ? "سالمين هادي | الشهادات" : "Salmen Hadi | Certificates";
+      document.title = lang === 'ar' ? "أمل هادي | الشهادات" : "Amal Hadi | Certificates";
     }
   }, [lang, mounted]);
 
@@ -372,7 +242,7 @@ export default function Certificates() {
     async function fetchCertificates() {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
       try {
-        const res = await fetch(`${apiBase}/api/certificates?owner=salmeen`);
+        const res = await fetch(`${apiBase}/api/certificates?owner=amal`);
         if (!res.ok) {
           throw new Error(`Failed to fetch: ${res.statusText}`);
         }
@@ -431,8 +301,7 @@ export default function Certificates() {
   if(!mounted) return null;
 
   return (
-    <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className={`min-h-[100dvh] ${isDark ? 'bg-[#050505] text-white' : 'bg-[#F9F8F6] text-[#15110E]'} selection:bg-[#A1824A] pb-32 relative overflow-hidden ${isAr ? 'font-alexandria' : 'font-sans'} transition-colors duration-700`} dir={isAr ? 'rtl' : 'ltr'}>
-      <style dangerouslySetInnerHTML={{__html: `@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;600;700;900&display=swap'); .font-alexandria { font-family: 'Alexandria', sans-serif; }`}} />
+    <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className={`min-h-[100dvh] ${isDark ? 'bg-[#2C3947] text-[#E8EDF2]' : 'bg-[#E8EDF2] text-[#2C3947]'} selection:bg-[#C2A56D] pb-32 relative overflow-hidden ${isAr ? 'font-alexandria' : 'font-sans'} transition-colors duration-700`} dir={isAr ? 'rtl' : 'ltr'}>
       
       <AnimatePresence>
         {selectedImg && (
@@ -447,26 +316,26 @@ export default function Certificates() {
 
       <AnimatePresence>
         {loading && (
-          <motion.div exit={{ opacity: 0, filter: 'blur(20px)', scale: 1.1 }} transition={{ duration: 0.8, ease: "easeInOut" }} className={`fixed inset-0 z-[999] ${isDark ? 'bg-[#050505]' : 'bg-[#F9F8F6]'} flex items-center justify-center`}>
+          <motion.div exit={{ opacity: 0, filter: 'blur(20px)', scale: 1.1 }} transition={{ duration: 0.8, ease: "easeInOut" }} className={`fixed inset-0 z-[999] ${isDark ? 'bg-[#2C3947]' : 'bg-[#E8EDF2]'} flex items-center justify-center`}>
             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} className="relative flex items-center justify-center">
-              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="absolute w-[180px] h-[180px] border-t-2 border-r-2 border-[#A1824A] rounded-full opacity-80 shadow-[0_0_30px_rgba(161,130,74,0.3)]"></motion.div>
-              <motion.div animate={{ rotate: -360 }} transition={{ repeat: Infinity, duration: 3, ease: "linear" }} className={`absolute w-[130px] h-[130px] border-b-2 border-l-2 ${isDark ? 'border-white/20' : 'border-[#15110E]/20'} rounded-full`}></motion.div>
-              <span className={`text-4xl md:text-5xl font-black tracking-[0.3em] ${isDark ? 'text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'text-[#15110E] drop-shadow-md'}`}>SK<span className="text-[#A1824A]">.</span></span>
+              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="absolute w-[180px] h-[180px] border-t-2 border-r-2 border-[#C2A56D] rounded-full opacity-80 shadow-[0_0_30px_rgba(194,165,109,0.3)]"></motion.div>
+              <motion.div animate={{ rotate: -360 }} transition={{ repeat: Infinity, duration: 3, ease: "linear" }} className={`absolute w-[130px] h-[130px] border-b-2 border-l-2 ${isDark ? 'border-white/20' : 'border-[#2C3947]/20'} rounded-full`}></motion.div>
+              <span className={`text-4xl md:text-5xl font-black tracking-[0.3em] ${isDark ? 'text-[#E8EDF2] drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'text-[#2C3947] drop-shadow-md'}`}>AH<span className="text-[#C2A56D]">.</span></span>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="absolute top-[-10%] left-[-10%] w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-[#A1824A]/10 blur-[100px] md:blur-[150px] rounded-full pointer-events-none -z-10"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-[#C2A56D]/10 blur-[100px] md:blur-[150px] rounded-full pointer-events-none -z-10"></div>
       
-      <nav className={`w-full h-20 md:h-24 flex items-center px-3 sm:px-4 md:px-12 border-b ${isDark ? 'border-white/5 bg-[#050505]/60' : 'border-[#15110E]/10 bg-white/60'} backdrop-blur-2xl sticky top-0 z-50 transition-colors duration-700`}>
+      <nav className={`w-full h-20 md:h-24 flex items-center px-3 sm:px-4 md:px-12 border-b ${isDark ? 'border-white/5 bg-[#2C3947]/60' : 'border-[#2C3947]/10 bg-[#E8EDF2]/60'} backdrop-blur-2xl sticky top-0 z-50 transition-colors duration-700`}>
         <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
-          <Link href="/" className="text-lg sm:text-xl md:text-2xl font-black tracking-widest hover:text-[#A1824A] transition-colors shrink-0">{isAr ? 'سالمين' : 'SALMEEN'}<span className="text-[#A1824A]">.</span></Link>
+          <Link href={basePrefix || "/"} className="text-lg sm:text-xl md:text-2xl font-black tracking-widest hover:text-[#C2A56D] transition-colors shrink-0">{isAr ? 'أمل' : 'AMAL'}<span className="text-[#C2A56D]">.</span></Link>
           <div className="flex gap-1.5 sm:gap-2 md:gap-3 items-center shrink-0">
-            <Link href="/" className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 text-[9px] sm:text-[10px] md:text-xs font-bold ${isDark ? 'text-stone-300 hover:text-white bg-white/5 border-white/10' : 'text-stone-600 hover:text-black bg-white border-stone-200'} px-2.5 sm:px-3 md:px-5 py-2 md:py-2.5 rounded-full border transition-all shadow-sm active:scale-95`}>{isAr ? <ArrowRight size={12}/> : <ArrowLeft size={12}/>} <span className="hidden md:inline">{isAr ? 'العودة للرئيسية' : 'Back to Home'}</span><span className="md:hidden">{isAr ? 'رجوع' : 'Back'}</span></Link>
-            <Link href="/portfolio" className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 text-[9px] sm:text-[10px] md:text-xs font-bold ${isDark ? 'text-stone-300 hover:text-white bg-white/5 border-white/10' : 'text-stone-600 hover:text-black bg-white border-stone-200'} px-2.5 sm:px-3 md:px-5 py-2 md:py-2.5 rounded-full border transition-all shadow-sm active:scale-95`}><Sparkles size={12} className="sm:w-[14px] sm:h-[14px] md:w-4 md:h-4"/><span className="hidden md:inline">{isAr ? 'معرض الأعمال' : 'Portfolio'}</span><span className="md:hidden">{isAr ? 'الأعمال' : 'Work'}</span></Link>
-            <button onClick={toggleLang} className={`${isDark ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-white text-black border-stone-200 hover:bg-stone-50'} border px-2.5 sm:px-3 md:px-4 py-2 md:py-2.5 rounded-full text-[9px] sm:text-[10px] md:text-xs font-bold shadow-sm hover:scale-105 active:scale-95 transition-all`}>{isAr ? 'EN' : 'عربي'}</button>
-            <button onClick={toggleTheme} className={`${isDark ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-[#15110E] text-white border-[#15110E] hover:bg-black'} border p-1.5 sm:p-2 md:p-2.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all`} title="Toggle Theme">
+            <Link href={basePrefix || "/"} className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 text-[9px] sm:text-[10px] md:text-xs font-bold ${isDark ? 'text-[#E8EDF2]/90 hover:text-white bg-[#E8EDF2]/10 border-white/10' : 'text-[#2C3947]/80 hover:text-black bg-white border-[#547A95]/30'} px-2.5 sm:px-3 md:px-5 py-2 md:py-2.5 rounded-full border transition-all shadow-sm active:scale-95`}>{isAr ? <ArrowRight size={12}/> : <ArrowLeft size={12}/>} <span className="hidden md:inline">{isAr ? 'العودة للرئيسية' : 'Back to Home'}</span><span className="md:hidden">{isAr ? 'رجوع' : 'Back'}</span></Link>
+            <Link href={`${basePrefix}/portfolio`} className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 text-[9px] sm:text-[10px] md:text-xs font-bold ${isDark ? 'text-[#E8EDF2]/90 hover:text-white bg-[#E8EDF2]/10 border-white/10' : 'text-[#2C3947]/80 hover:text-black bg-white border-[#547A95]/30'} px-2.5 sm:px-3 md:px-5 py-2 md:py-2.5 rounded-full border transition-all shadow-sm active:scale-95`}><Sparkles size={12} className="sm:w-[14px] sm:h-[14px] md:w-4 md:h-4"/><span className="hidden md:inline">{isAr ? 'معرض الأعمال' : 'Portfolio'}</span><span className="md:hidden">{isAr ? 'الأعمال' : 'Work'}</span></Link>
+            <button onClick={toggleLang} className={`${isDark ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-white text-[#2C3947] border-[#547A95]/30 hover:bg-stone-50'} border px-2.5 sm:px-3 md:px-4 py-2 md:py-2.5 rounded-full text-[9px] sm:text-[10px] md:text-xs font-bold shadow-sm hover:scale-105 active:scale-95 transition-all`}>{isAr ? 'EN' : 'عربي'}</button>
+            <button onClick={toggleTheme} className={`${isDark ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-[#2C3947] text-white border-[#2C3947] hover:bg-black'} border p-1.5 sm:p-2 md:p-2.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all`} title="Toggle Theme">
               {isDark ? <Sun size={14} className="md:w-4 md:h-4"/> : <Moon size={14} className="md:w-4 md:h-4"/>}
             </button>
           </div>
@@ -476,8 +345,8 @@ export default function Certificates() {
       <section className="pt-16 md:pt-24 pb-10 px-4 md:px-6 max-w-7xl mx-auto text-center relative z-10">
         <AnimatePresence mode="wait">
           <motion.div key={lang} initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -10, filter: 'blur(5px)' }} transition={{ duration: 0.3 }}>
-            <div className={`inline-flex items-center gap-2 px-4 md:px-5 py-1.5 md:py-2 ${isDark ? 'bg-[#A1824A]/10 border-[#A1824A]/20' : 'bg-white border-[#A1824A]/30 shadow-sm'} rounded-full border mb-4 md:mb-6 text-[10px] md:text-xs font-black text-[#A1824A] uppercase tracking-widest`}><Award size={14} /> {isAr ? 'المعرض البصري' : 'Visual Gallery'}</div>
-            <h1 className={`text-3xl sm:text-4xl md:text-6xl font-black mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-b ${isDark ? 'from-white to-stone-400' : 'from-[#15110E] to-stone-500'} overflow-visible leading-[1.4] pb-[0.2em] pt-2`}>{isAr ? 'السجل' : 'Academic'} <span className="text-[#A1824A]">{isAr ? 'الأكاديمي.' : 'Record.'}</span></h1>
+            <div className={`inline-flex items-center gap-2 px-4 md:px-5 py-1.5 md:py-2 ${isDark ? 'bg-[#C2A56D]/10 border-[#C2A56D]/20' : 'bg-white border-[#C2A56D]/30 shadow-sm'} rounded-full border mb-4 md:mb-6 text-[10px] md:text-xs font-black text-[#C2A56D] uppercase tracking-widest`}><Award size={14} /> {isAr ? 'المعرض البصري' : 'Visual Gallery'}</div>
+            <h1 className={`text-3xl sm:text-4xl md:text-6xl font-black mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-b ${isDark ? 'from-white to-stone-400' : 'from-[#2C3947] to-[#547A95]'} overflow-visible leading-[1.4] pb-[0.2em] pt-2`}>{isAr ? 'السجل' : 'Academic'} <span className="text-[#C2A56D]">{isAr ? 'الأكاديمي.' : 'Record.'}</span></h1>
           </motion.div>
         </AnimatePresence>
       </section>
@@ -486,11 +355,11 @@ export default function Certificates() {
       <section className="px-4 md:px-6 max-w-4xl mx-auto z-10 relative mb-12">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
           <div className="flex items-center justify-center mb-6">
-            <span className="px-5 py-2 bg-gradient-to-r from-[#A1824A] to-yellow-600 text-black font-black text-xs md:text-sm rounded-full shadow-[0_0_20px_rgba(161,130,74,0.4)] flex items-center gap-2">
+            <span className="px-5 py-2 bg-gradient-to-r from-[#C2A56D] to-[#b39158] text-black font-black text-xs md:text-sm rounded-full shadow-[0_0_20px_rgba(194,165,109,0.4)] flex items-center gap-2">
               <Award size={16} /> {isAr ? 'المؤهل الأكاديمي الأساسي' : 'Primary Academic Degree'}
             </span>
           </div>
-          <Tilt glareEnable={true} glareMaxOpacity={0.1} glareColor="#A1824A" glarePosition="all" tiltMaxAngleX={1} tiltMaxAngleY={1} className="w-full">
+          <Tilt glareEnable={true} glareMaxOpacity={0.1} glareColor="#C2A56D" glarePosition="all" tiltMaxAngleX={1} tiltMaxAngleY={1} className="w-full">
             
             <div className="w-full h-[400px] md:h-[350px] [perspective:1500px] group/card cursor-pointer">
               <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover/card:[transform:rotateY(180deg)]">
@@ -498,16 +367,16 @@ export default function Certificates() {
                 {/* Front Face */}
                 <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] z-20">
                   <div className={`flex flex-col md:flex-row h-full w-full backdrop-blur-md rounded-3xl overflow-visible border active:scale-[0.98] transition-all duration-500 ${
-                    isDark ? 'bg-[#0a0c10]/90 border-white/5 text-[#E8EDF2]' : 'bg-white border-stone-200 text-[#15110E]'
+                    isDark ? 'bg-[#2C3947]/90 border-white/5 text-[#E8EDF2]' : 'bg-white border-stone-200 text-[#2C3947]'
                   }`}>
                     {/* Left Split */}
                     <div 
                       className={`w-full md:w-2/5 flex flex-col justify-between p-6 border-b md:border-b-0 ${isAr ? 'md:border-l' : 'md:border-r'} shrink-0 relative`}
                       style={{
-                        borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(21,17,14,0.08)',
+                        borderColor: isDark ? 'rgba(84,122,149,0.2)' : 'rgba(84,122,149,0.1)',
                         background: isDark 
-                          ? `radial-gradient(circle at top left, rgba(161,130,74,0.15) 0%, #0a0c10 100%)` 
-                          : `radial-gradient(circle at top left, rgba(161,130,74,0.08) 0%, #ffffff 100%)`
+                          ? `radial-gradient(circle at top left, rgba(194,165,109,0.15) 0%, #2C3947 100%)` 
+                          : `radial-gradient(circle at top left, rgba(194,165,109,0.08) 0%, #ffffff 100%)`
                       }}
                     >
                       {primaryCert.image && (
@@ -518,7 +387,7 @@ export default function Certificates() {
                       )}
                       
                       <div className="flex flex-col gap-4 relative z-10">
-                        <Award size={38} className={isDark ? 'text-white' : 'text-[#A1824A]'} />
+                        <Award size={38} className={isDark ? 'text-white' : 'text-[#C2A56D]'} />
                         <div>
                           <span className={`px-2.5 py-0.5 text-[8px] font-black rounded-full border uppercase tracking-wider ${
                             isDark ? 'bg-white/5 text-stone-300 border-white/10' : 'bg-stone-100 text-stone-600 border-stone-200'
@@ -534,7 +403,7 @@ export default function Certificates() {
                     {/* Right Split */}
                     <div className="w-full md:w-3/5 flex flex-col justify-between p-6 overflow-y-auto overflow-x-visible">
                       <div className="flex flex-col gap-3 font-sans pr-1 scrollbar-thin">
-                        <h3 className={`text-base md:text-lg font-black leading-[1.7] ${isDark ? 'text-white' : 'text-[#15110E]'} ${isAr ? 'text-right' : 'text-left'}`}>
+                        <h3 className={`text-base md:text-lg font-black leading-[1.7] ${isDark ? 'text-white' : 'text-[#2C3947]'} ${isAr ? 'text-right' : 'text-left'}`}>
                           {primaryName}
                         </h3>
                         <p className={`text-[10.5px] leading-[1.8] ${isDark ? 'text-stone-300' : 'text-stone-700'} ${isAr ? 'text-right' : 'text-left'}`}>
@@ -567,13 +436,13 @@ export default function Certificates() {
                         })()}
                       </div>
 
-                      <div className="flex items-center justify-between pt-4 border-t border-dashed mt-4 text-[9px] text-stone-500 dark:text-stone-400" style={{ borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(21,17,14,0.08)' }}>
+                      <div className="flex items-center justify-between pt-4 border-t border-dashed mt-4 text-[9px] text-stone-500 dark:text-stone-400" style={{ borderColor: isDark ? 'rgba(84,122,149,0.2)' : 'rgba(84,122,149,0.1)' }}>
                         <span>
                           {isAr 
                             ? (primaryCert.degree_level_ar || 'المستوى التعليمي: بكالوريوس / Diploma') 
                             : (primaryCert.degree_level_en || 'Degree Level: Higher Software Diploma')}
                         </span>
-                        <span className={`font-black italic text-[#A1824A]`}>{isAr ? 'مرر لرؤية الوثيقة الحية 🫵' : 'Hover to flip diploma 🫵'}</span>
+                        <span className={`font-black italic ${isDark ? 'text-[#C2A56D]' : 'text-[#C2A56D]'}`}>{isAr ? 'مرر لرؤية الوثيقة الحية 🫵' : 'Hover to flip diploma 🫵'}</span>
                       </div>
                     </div>
                   </div>
@@ -591,12 +460,12 @@ export default function Certificates() {
                       backgroundPosition: 'center'
                     }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#A1824A]/15 via-[#0a0c10]/70 to-[#0a0c10]/95 z-0"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#C2A56D]/15 via-[#2C3947]/70 to-[#2C3947]/95 z-0"></div>
                     
                     <div className="relative z-10 flex flex-col gap-4">
                       <div className="flex justify-between items-center">
                         <span className="px-3 py-1 bg-black/50 backdrop-blur-md text-white text-[9px] font-black rounded border border-white/10 uppercase">{primaryIssuer}</span>
-                        <span className="px-3 py-1 bg-[#A1824A] text-black text-[9px] font-black rounded-full border border-yellow-300/20 shadow-md">
+                        <span className="px-3 py-1 bg-[#C2A56D] text-black text-[9px] font-black rounded-full border border-yellow-300/20 shadow-md">
                           {isAr ? 'الوثيقة الرسمية' : 'OFFICIAL DIPLOMA'}
                         </span>
                       </div>
@@ -624,9 +493,9 @@ export default function Certificates() {
       {/* باقي الشهادات */}
       <section className="px-4 md:px-6 max-w-7xl mx-auto z-10 relative">
         <div className="flex items-center justify-center mb-8">
-            <div className={`h-px flex-1 ${isDark ? 'bg-white/10' : 'bg-[#15110E]/10'}`}></div>
+            <div className={`h-px flex-1 ${isDark ? 'bg-white/10' : 'bg-[#2C3947]/10'}`}></div>
             <span className={`px-4 text-xs font-bold uppercase tracking-widest ${isDark ? 'text-stone-400' : 'text-stone-500'}`}>{isAr ? 'الشهادات المهنية والتطويرية' : 'Professional Certificates'}</span>
-            <div className={`h-px flex-1 ${isDark ? 'bg-white/10' : 'bg-[#15110E]/10'}`}></div>
+            <div className={`h-px flex-1 ${isDark ? 'bg-white/10' : 'bg-[#2C3947]/10'}`}></div>
         </div>
         
         {otherCerts.length > 0 ? (
@@ -657,7 +526,7 @@ export default function Certificates() {
         )}
       </section>
       
-      <FloatingChat />
+      <FloatingChat owner="amal" />
     </motion.main>
   );
 }

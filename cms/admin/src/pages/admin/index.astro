@@ -1,0 +1,873 @@
+---
+import { registry } from '../../../../schema/registry';
+
+let authError = '';
+
+// Handle Stub Authentication and Actions
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+  const action = formData.get('action');
+  
+  if (action === 'login') {
+    const email = formData.get('email')?.toString().trim().toLowerCase();
+    const password = formData.get('password')?.toString().trim();
+
+    let loginOwner = '';
+    if (email === 'shssk.16@gmail.com' && password === 'salmen13') {
+      loginOwner = 'salmeen';
+    } else if (
+      (email === 'amal@example.com' || email === 'amalhadi@example.com' || email === 'amal.hadi@example.com' || email === 'sister@example.com') && 
+      (password === 'amal123' || password === 'sister123')
+    ) {
+      loginOwner = 'amal';
+    }
+
+    if (loginOwner) {
+      Astro.cookies.set('cms_session', loginOwner, {
+        path: '/',
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 28800
+      });
+      return Astro.redirect('/admin');
+    } else {
+      authError = 'Incorrect email or password. Please try again.';
+    }
+  }
+
+  if (action === 'logout') {
+    Astro.cookies.delete('cms_session', { path: '/' });
+    return Astro.redirect('/admin');
+  }
+}
+
+let session = Astro.cookies.get('cms_session')?.value;
+if (session === 'sister') {
+  session = 'amal';
+}
+console.log('🍪 Cookies on /admin:', Astro.request.headers.get('cookie'));
+const isAuthenticated = !!session;
+
+const adminName = session === 'salmeen' ? 'Salmeen Hadi' : (session === 'amal' ? 'Amal Hadi' : 'Developer Admin');
+const adminRole = session === 'salmeen' ? 'Salmeen Portfolio' : (session === 'amal' ? 'Amal Portfolio' : 'Cloudflare Access');
+
+const contentTypes = Object.values(registry);
+
+const hostname = Astro.url.hostname || '';
+const isAmalHost = hostname.includes('amal');
+const isSalmeenHost = hostname.includes('salmeen');
+const hostBranding = isAmalHost ? 'AMAL' : (isSalmeenHost ? 'SALMEEN' : 'PORTFOLIO');
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloudflare Native CMS Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style is:global>
+    :root {
+      --bg-dark: #050505;
+      --bg-card: rgba(12, 12, 12, 0.65);
+      --border-color: rgba(161, 130, 74, 0.15);
+      --border-hover: rgba(161, 130, 74, 0.35);
+      --border-subtle: rgba(255, 255, 255, 0.04);
+      --text-main: #f5f5f7;
+      --text-muted: #86868b;
+      --text-white: #ffffff;
+      --accent: #A1824A;
+      --accent-hover: #C4A468;
+      --accent-glow: rgba(161, 130, 74, 0.08);
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      background-image: 
+        linear-gradient(rgba(161, 130, 74, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(161, 130, 74, 0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      background-position: center top;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Auth View Styles */
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at top, rgba(161, 130, 74, 0.15), transparent 50%);
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 56px 48px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 32px 80px -16px rgba(0, 0, 0, 0.8);
+      text-align: center;
+      animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .auth-brand {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: var(--text-white);
+      margin-bottom: 12px;
+    }
+
+    .auth-brand span {
+      color: var(--accent);
+    }
+
+    .auth-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 36px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+    }
+
+    .form-input {
+      width: 100%;
+      background: rgba(8, 8, 8, 0.9);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px 18px;
+      color: var(--text-white);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(161, 130, 74, 0.15);
+      background: #000000;
+    }
+
+    .auth-btn {
+      width: 100%;
+      background-color: var(--accent);
+      color: #000000;
+      border: none;
+      padding: 16px 32px;
+      font-size: 14px;
+      font-weight: 800;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-top: 16px;
+      box-shadow: 0 6px 20px rgba(161, 130, 74, 0.2);
+    }
+
+    .auth-btn:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(161, 130, 74, 0.35);
+    }
+
+    .auth-btn:active {
+      transform: translateY(0);
+    }
+
+    .alert-danger {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 28px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Pinned Top Navigation Bar */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 5, 5, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border-color);
+      width: 100%;
+      height: 76px;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      color: var(--text-white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: transform 0.2s ease;
+    }
+
+    .nav-brand:active {
+      transform: scale(0.98);
+    }
+
+    .nav-brand span {
+      color: var(--accent);
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.2s ease;
+      position: relative;
+      padding: 6px 0;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--accent);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 9999px;
+    }
+
+    /* Dropdown Menu */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .nav-dropdown-trigger {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s ease;
+      padding: 6px 0;
+    }
+
+    .nav-dropdown-trigger:hover {
+      color: var(--accent);
+    }
+
+    .nav-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 16px);
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: rgba(8, 8, 8, 0.98);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 10px;
+      min-width: 220px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nav-dropdown:hover .nav-dropdown-menu {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-item {
+      display: block;
+      padding: 12px 18px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(161, 130, 74, 0.1);
+      color: var(--accent);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .user-profile {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .profile-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .profile-role {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .logout-btn {
+      background: none;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 8px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .logout-btn:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.05);
+      transform: translateY(-1px);
+    }
+
+    /* Main Container */
+    .page-container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 64px 32px 96px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 56px;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      position: relative;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 40px;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: var(--accent);
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .hero-title {
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      color: var(--text-white);
+      line-height: 1.05;
+      margin-bottom: 18px;
+    }
+
+    .hero-title span {
+      color: var(--accent);
+    }
+
+    .hero-subtitle {
+      font-size: 17px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 65ch;
+    }
+
+    /* Dashboard Grid Layout (2-column layout) */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 40px;
+    }
+
+    /* Panel Block */
+    .panel-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .panel-block:hover {
+      border-color: var(--border-color);
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    .block-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .block-badge {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      background: rgba(161, 130, 74, 0.1);
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 9999px;
+      border: 1px solid rgba(161, 130, 74, 0.15);
+    }
+
+    .block-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-white);
+      letter-spacing: -0.5px;
+    }
+
+    .block-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Asymmetric Bento Grid for Schema Models */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .bento-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(161, 130, 74, 0.15);
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 180px;
+      text-decoration: none !important;
+      color: var(--text-main) !important;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Asymmetric logic: double-width card for the largest model (Projects) */
+    .bento-card.double-width {
+      grid-column: span 2;
+      min-height: 200px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(161, 130, 74, 0.04));
+    }
+
+    .bento-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 100% 0%, rgba(161, 130, 74, 0.08), transparent 50%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .bento-card:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: var(--border-color);
+      transform: translateY(-2px);
+    }
+
+    .bento-card:hover::before {
+      opacity: 1;
+    }
+
+    .bento-card:active {
+      transform: scale(0.98);
+    }
+
+    .bento-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative;
+      z-index: 2;
+    }
+
+    .bento-icon {
+      font-size: 20px;
+      font-weight: 800;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .bento-card:hover .bento-icon {
+      background: var(--accent);
+      color: #000000;
+      border-color: var(--accent);
+      box-shadow: 0 0 16px rgba(161, 130, 74, 0.3);
+    }
+
+    .bento-count {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(161, 130, 74, 0.08);
+      border: 1px solid rgba(161, 130, 74, 0.15);
+      padding: 6px 14px;
+      border-radius: 9999px;
+    }
+
+    .bento-card-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .bento-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-white) !important;
+      letter-spacing: -0.3px;
+      text-decoration: none !important;
+    }
+
+    .bento-slug {
+      font-size: 12px;
+      color: var(--text-muted) !important;
+      text-decoration: none !important;
+    }
+
+    .bento-slug code {
+      font-family: monospace;
+      color: var(--accent) !important;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Right column support blocks */
+    .support-block {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .support-block .panel-block {
+      padding: 32px;
+    }
+
+    .support-icon-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .support-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(161, 130, 74, 0.08);
+      border: 1px solid rgba(161, 130, 74, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsiveness */
+    @media (max-width: 1100px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      .support-block {
+        flex-direction: row;
+        gap: 20px;
+      }
+      .support-block > * {
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-menu, .user-profile {
+        display: none;
+      }
+      .page-container {
+        padding: 32px 20px;
+        gap: 32px;
+      }
+      .hero-title {
+        font-size: 40px;
+      }
+      .bento-grid {
+        grid-template-columns: 1fr;
+      }
+      .bento-card.double-width {
+        grid-column: span 1;
+      }
+      .support-block {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  {!isAuthenticated ? (
+    <div class="auth-container">
+      <div class="auth-card">
+        <h1 class="auth-brand">{hostBranding}<span>.</span>CMS</h1>
+        <p>Enter your credentials to access the portfolio editor.</p>
+        
+        {authError && (
+          <div class="alert-danger">
+            <span>⚠️</span> {authError}
+          </div>
+        )}
+
+        <form method="POST">
+          <input type="hidden" name="action" value="login" />
+          
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input 
+              type="email" 
+              name="email" 
+              required 
+              class="form-input"
+              placeholder="email@example.com" 
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input 
+              type="password" 
+              name="password" 
+              required 
+              class="form-input"
+              placeholder="••••••••" 
+            />
+          </div>
+
+          <button type="submit" class="auth-btn">Sign In</button>
+        </form>
+      </div>
+    </div>
+  ) : (
+    <>
+      <nav class="top-nav">
+        <div class="nav-container">
+          <a href="/admin" class="nav-brand">{session === 'salmeen' ? 'SALMEEN' : 'AMAL'}<span>.</span>CMS</a>
+          
+          <div class="nav-menu">
+            <a href="/admin" class="nav-link active">Dashboard</a>
+            
+            <div class="nav-dropdown">
+              <button class="nav-dropdown-trigger">
+                Content Types <span>▼</span>
+              </button>
+              <div class="nav-dropdown-menu">
+                {contentTypes.filter((s: any) => s.slug !== 'media').map((schema: any) => (
+                  <a href={`/admin/content/${schema.slug}`} class="dropdown-item">
+                    {schema.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <a href="/admin/media" class="nav-link">Media Library</a>
+          </div>
+
+          <div class="nav-right">
+            <div class="user-profile">
+              <span class="profile-name">{adminName}</span>
+              <span class="profile-role">{adminRole}</span>
+            </div>
+            <form method="POST">
+              <input type="hidden" name="action" value="logout" />
+              <button type="submit" class="logout-btn">Log out</button>
+            </form>
+          </div>
+        </div>
+      </nav>
+
+      <div class="page-container">
+        <section class="hero-section">
+          <span class="hero-eyebrow">Control Center</span>
+          <h1 class="hero-title">Cloudflare Native CMS<span>.</span></h1>
+          <p class="hero-subtitle">Edge-powered dynamic portfolio control panel for {adminRole}.</p>
+        </section>
+
+        <div class="dashboard-grid">
+          <div class="main-panel">
+            <div class="panel-block">
+              <div class="block-header">
+                <h3 class="block-title">Registered Schema Models</h3>
+                <span class="block-badge">Database Schemas</span>
+              </div>
+              <p class="block-desc" style="margin-bottom: 32px;">
+                Manage all dynamic content types for the portfolio site. Dynamic list forms are auto-generated from your schemas.
+              </p>
+              
+              <div class="bento-grid">
+                {contentTypes.map((schema: any) => {
+                  // Abbreviate name to create a cool logo
+                  const iconLabel = schema.label.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+                  
+                  // Make projects card double-width since it has 19 fields
+                  const isDouble = schema.slug === 'projects';
+                  
+                  return (
+                    <a href={schema.slug === 'media' ? '/admin/media' : `/admin/content/${schema.slug}`} class={`bento-card ${isDouble ? 'double-width' : ''}`}>
+                      <div class="bento-card-top">
+                        <div class="bento-icon">{iconLabel}</div>
+                        <span class="bento-count">{schema.fields.length} Fields</span>
+                      </div>
+                      <div class="bento-card-bottom">
+                        <h4 class="bento-name">{schema.label}</h4>
+                        <span class="bento-slug">Slug: <code>{schema.slug}</code> | Singular: <code>{schema.singular}</code></span>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div class="support-block">
+            <div class="panel-block">
+              <div class="support-icon-header">
+                <div class="support-icon">D1</div>
+                <h3 class="block-title">SQL Migration</h3>
+              </div>
+              <span class="block-badge" style="width: fit-content; margin-bottom: 12px;">Engine</span>
+              <p class="block-desc">
+                Your schemas are analyzed from <code>/schema</code> files. When you add a new schema file, run <code>npm run db:generate</code> and your database tables are updated dynamically.
+              </p>
+            </div>
+
+            <div class="panel-block">
+              <div class="support-icon-header">
+                <div class="support-icon">R2</div>
+                <h3 class="block-title">Media Storage</h3>
+              </div>
+              <span class="block-badge" style="width: fit-content; margin-bottom: 12px;">R2 Storage</span>
+              <p class="block-desc">
+                Media elements are automatically streamed to Cloudflare R2 and served using cached URLs with 1-year immutability.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )}
+
+</body>
+</html>

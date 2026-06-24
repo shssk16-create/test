@@ -1,0 +1,1317 @@
+---
+import { registry } from '../../../../../schema/registry';
+
+const API_BASE = (import.meta.env.PUBLIC_API_URL || 'http://127.0.0.1:8787').trim();
+
+function cleanCdnUrl(url: string, apiBase: string) {
+  if (!url) return "";
+  if (url.startsWith('/')) {
+    return `${apiBase}${url}`;
+  }
+  if (url.includes('/api/media/download')) {
+    const parts = url.split('key=');
+    if (parts.length > 1) {
+      const key = parts[1].split('&')[0];
+      return `${apiBase}/api/media/download?key=${key}`;
+    }
+  }
+  return url;
+}
+
+// Auth Check
+console.log('🍪 Cookies on content route:', Astro.request.headers.get('cookie'));
+let session = Astro.cookies.get('cms_session')?.value;
+if (session === 'sister') {
+  session = 'amal';
+}
+if (!session) {
+  return Astro.redirect('/admin');
+}
+
+const { type } = Astro.params;
+const activeSchema = Object.values(registry).find((s: any) => s.slug === type);
+
+if (!activeSchema || activeSchema.slug !== type) {
+  return Astro.redirect('/admin');
+}
+
+const action = Astro.url.searchParams.get('action'); // 'new' | 'edit' | null (list)
+const itemId = Astro.url.searchParams.get('id');
+
+// Server-side actions (Create, Update, Delete)
+let formError = '';
+if (Astro.request.method === 'POST') {
+  try {
+    const formData = await Astro.request.formData();
+    const formAction = formData.get('_action');
+
+    if (formAction === 'save') {
+      const payload: Record<string, any> = {};
+      
+      for (const field of activeSchema.fields) {
+        let value: any = formData.get(field.name);
+        
+        if (field.type === 'boolean') {
+          value = value === 'on';
+        } else if (field.type === 'repeater') {
+          if (typeof value === 'string' && value.trim()) {
+            try {
+              value = JSON.parse(value);
+            } catch (e) {
+              value = value.split(',').map((s: string) => s.trim()).filter(Boolean);
+            }
+          } else {
+            value = [];
+          }
+        }
+        
+        payload[field.name] = value;
+      }
+
+      if (itemId) {
+        // Edit / Update (PATCH)
+        const res = await fetch(`${API_BASE}/api/${type}/${itemId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer mock_admin_token'
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(JSON.stringify(data.error));
+      } else {
+        // Create (POST)
+        payload.owner = session;
+        const res = await fetch(`${API_BASE}/api/${type}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer mock_admin_token'
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(JSON.stringify(data.error));
+      }
+      return Astro.redirect(`/admin/content/${type}`);
+    }
+
+    if (formAction === 'delete' && itemId) {
+      // Soft Delete (DELETE)
+      const res = await fetch(`${API_BASE}/api/${type}/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer mock_admin_token'
+        }
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      return Astro.redirect(`/admin/content/${type}`);
+    }
+  } catch (err: any) {
+    formError = err.message;
+  }
+}
+
+// Fetch lists or single item
+let items: any[] = [];
+let editItem: any = null;
+
+try {
+  if (action === 'edit' && itemId) {
+    const res = await fetch(`${API_BASE}/api/${type}/${itemId}`);
+    const data = await res.json();
+    if (data.data) {
+      editItem = data.data;
+    }
+  } else if (!action) {
+    const res = await fetch(`${API_BASE}/api/${type}?owner=${session}`);
+    const data = await res.json();
+    if (data.data) {
+      items = data.data;
+    }
+  }
+} catch (err) {
+  console.error('Failed to fetch data from API:', err);
+}
+
+const contentTypes = Object.values(registry);
+const adminName = session === 'salmeen' ? 'Salmeen Hadi' : (session === 'amal' ? 'Amal Hadi' : 'Developer Admin');
+const adminRole = session === 'salmeen' ? 'Salmeen Portfolio' : (session === 'amal' ? 'Amal Portfolio' : 'Cloudflare Access');
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage {activeSchema.label} - CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #050505;
+      --bg-card: rgba(18, 18, 18, 0.6);
+      --border-color: rgba(161, 130, 74, 0.15);
+      --border-subtle: rgba(255, 255, 255, 0.05);
+      --text-main: #f5f5f7;
+      --text-muted: #86868b;
+      --text-white: #ffffff;
+      --accent: #A1824A;
+      --accent-hover: #C4A468;
+      --accent-glow: rgba(161, 130, 74, 0.08);
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Pinned Top Navigation Bar */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 5, 5, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      width: 100%;
+      height: 72px;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-brand span {
+      color: var(--accent);
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s ease;
+      cursor: pointer;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--accent);
+    }
+
+    /* Dropdown Menu */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .nav-dropdown-trigger {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s ease;
+    }
+
+    .nav-dropdown-trigger:hover {
+      color: var(--accent);
+    }
+
+    .nav-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: rgba(10, 10, 10, 0.95);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 8px;
+      min-width: 200px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nav-dropdown:hover .nav-dropdown-menu {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-item {
+      display: block;
+      padding: 10px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(161, 130, 74, 0.1);
+      color: var(--accent);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .user-profile {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .profile-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-white);
+    }
+
+    .profile-role {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .logout-btn {
+      background: none;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .logout-btn:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    /* Main Container */
+    .page-container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(180deg, var(--bg-dark), rgba(161, 130, 74, 0.03));
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .hero-title {
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: var(--text-white);
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .hero-title span {
+      color: var(--accent);
+    }
+
+    .hero-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 65ch;
+    }
+
+    /* Table / List View */
+    .btn {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 9999px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #000000;
+      box-shadow: 0 4px 12px rgba(161, 130, 74, 0.2);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-1.5px);
+      box-shadow: 0 6px 18px rgba(161, 130, 74, 0.35);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-danger {
+      background-color: transparent;
+      color: var(--danger);
+      border-color: var(--border-subtle);
+    }
+
+    .btn-danger:hover {
+      background-color: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-color);
+    }
+
+    .table-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 18px 24px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    td {
+      padding: 20px 24px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .action-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .action-links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+
+    .action-links a:hover {
+      color: var(--accent-hover);
+      text-decoration: underline;
+    }
+
+    .empty-state {
+      padding: 80px 40px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state p {
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+
+    /* Form Styles */
+    .form-container-box {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .form-group {
+      margin-bottom: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    input[type="text"], input[type="date"], select, textarea {
+      width: 100%;
+      background-color: rgba(10, 10, 10, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text-white);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    input[type="text"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(161, 130, 74, 0.15);
+    }
+
+    .checkbox-group {
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .checkbox-group input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .upload-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .upload-status {
+      font-size: 12px;
+      color: var(--accent);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 48px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 28px;
+    }
+
+    .form-actions-right {
+      display: flex;
+      gap: 12px;
+    }
+
+    .alert-danger {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 32px;
+    }
+
+    /* Tag List styling */
+    .tag-list-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .tag-item {
+      background: rgba(161, 130, 74, 0.1);
+      border: 1px solid rgba(161, 130, 74, 0.2);
+      color: var(--text-white);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tag-item button {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      transition: color 0.2s ease;
+    }
+    .tag-item button:hover {
+      color: var(--danger);
+    }
+    .tag-input-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.8);
+      animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-white);
+      letter-spacing: -0.3px;
+    }
+    .close-modal-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 28px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+    .close-modal-btn:hover {
+      color: var(--text-white);
+    }
+    .modal-search {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .modal-grid {
+      padding: 24px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+      flex-grow: 1;
+      max-height: 50vh;
+    }
+    .modal-media-item {
+      background: #0a0a0a;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s ease;
+    }
+    .modal-media-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .modal-media-preview {
+      height: 110px;
+      background: #050505;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .modal-media-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+    .modal-media-name {
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-menu, .user-profile {
+        display: none;
+      }
+      .page-container {
+        padding: 32px 20px;
+        gap: 32px;
+      }
+      .hero-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+      }
+      .hero-title {
+        font-size: 36px;
+      }
+      .form-card {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-container">
+      <a href="/admin" class="nav-brand">{session === 'salmeen' ? 'SALMEEN' : 'AMAL'}<span>.</span>CMS</a>
+      
+      <div class="nav-menu">
+        <a href="/admin" class="nav-link">Dashboard</a>
+        
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-trigger">
+            Content Types <span>▼</span>
+          </button>
+          <div class="nav-dropdown-menu">
+            {contentTypes.filter((s: any) => s.slug !== 'media').map((schema: any) => (
+              <a href={`/admin/content/${schema.slug}`} class={`dropdown-item ${schema.slug === type ? 'active' : ''}`}>
+                {schema.label}
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <a href="/admin/media" class="nav-link">Media Library</a>
+      </div>
+
+      <div class="nav-right">
+        <div class="user-profile">
+          <span class="profile-name">{adminName}</span>
+          <span class="profile-role">{adminRole}</span>
+        </div>
+        <form method="POST">
+          <input type="hidden" name="action" value="logout" />
+          <button type="submit" class="logout-btn">Log out</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-container">
+    {action === 'new' || action === 'edit' ? (
+      // FORM VIEW
+      <div>
+        <section class="hero-section">
+          <div>
+            <span class="hero-eyebrow">Schema Form</span>
+            <h1 class="hero-title">{action === 'edit' ? 'Edit' : 'Create'} {activeSchema.singular}<span>.</span></h1>
+            <p class="hero-subtitle">Input properties for this database model.</p>
+          </div>
+          <a href={`/admin/content/${type}`} class="btn btn-secondary">Cancel</a>
+        </section>
+
+        {formError && <div class="alert-danger">{formError}</div>}
+
+        <div class="form-container-box">
+          <div class="form-card">
+            <form method="POST">
+              <input type="hidden" name="_action" value="save" />
+
+              {activeSchema.fields.map((field: any) => {
+                const value = editItem ? editItem[field.name] : '';
+
+                if (field.type === 'boolean') {
+                  return (
+                    <div class="form-group checkbox-group">
+                      <input 
+                        type="checkbox" 
+                        name={field.name} 
+                        id={`input-${field.name}`}
+                        checked={editItem ? !!editItem[field.name] : false} 
+                      />
+                      <label for={`input-${field.name}`}>{field.label}</label>
+                    </div>
+                  );
+                }
+
+                if (field.type === 'select') {
+                  return (
+                    <div class="form-group">
+                      <label for={`input-${field.name}`}>{field.label}</label>
+                      <select name={field.name} id={`input-${field.name}`} required={field.required}>
+                        <option value="">Select option...</option>
+                        {field.options?.map((opt: string) => (
+                          <option value={opt} selected={value === opt}>{opt}</option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                }
+
+                if (field.type === 'image') {
+                  return (
+                    <div class="form-group">
+                      <label for={`input-${field.name}`}>{field.label}</label>
+                      <div class="upload-row">
+                        <input 
+                          type="text" 
+                          name={field.name} 
+                          id={`input-${field.name}`} 
+                          value={value} 
+                          placeholder="R2 Image URL"
+                          required={field.required}
+                        />
+                        <button 
+                          type="button" 
+                          class="btn btn-secondary" 
+                          id={`btn-upload-${field.name}`}
+                        >
+                          Upload File
+                        </button>
+                        <button 
+                          type="button" 
+                          class="btn btn-secondary btn-choose-library" 
+                          data-field={field.name}
+                          id={`btn-library-${field.name}`}
+                        >
+                          Choose from Library
+                        </button>
+                        <input 
+                          type="file" 
+                          id={`file-${field.name}`} 
+                          class="hidden-file-input" 
+                          style="display: none;" 
+                          accept="image/*"
+                        />
+                      </div>
+                      <div class="upload-status" id={`status-${field.name}`}></div>
+                      <div style="margin-top: 14px;">
+                        <img 
+                          id={`preview-${field.name}`} 
+                          src={cleanCdnUrl(value, API_BASE)} 
+                          style={`max-height: 160px; border-radius: 12px; display: ${value ? 'block' : 'none'}; border: 1px solid var(--border-color);`} 
+                        />
+                      </div>
+                    </div>
+
+                    <script is:inline define:vars={{ fieldName: field.name, apiBase: API_BASE, owner: session }}>
+                      const fileInput = document.getElementById(`file-${fieldName}`);
+                      const urlInput = document.getElementById(`input-${fieldName}`);
+                      const uploadBtn = document.getElementById(`btn-upload-${fieldName}`);
+                      const statusDiv = document.getElementById(`status-${fieldName}`);
+                      const previewImg = document.getElementById(`preview-${fieldName}`);
+
+                      uploadBtn?.addEventListener('click', () => {
+                        fileInput?.click();
+                      });
+
+                      urlInput?.addEventListener('input', () => {
+                        if (previewImg) {
+                          const val = urlInput.value.trim();
+                          if (val) {
+                            previewImg.src = val.startsWith('/') ? `${apiBase}${val}` : val;
+                            previewImg.style.display = 'block';
+                          } else {
+                            previewImg.style.display = 'none';
+                          }
+                        }
+                      });
+
+                      fileInput?.addEventListener('change', async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        statusDiv.innerText = 'Uploading to R2...';
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('owner', owner);
+
+                        try {
+                          const res = await fetch(`${apiBase}/api/media/upload`, {
+                            method: 'POST',
+                            headers: {
+                              'Authorization': 'Bearer mock_admin_token'
+                            },
+                            body: formData
+                          });
+                          const data = await res.json();
+                          if (data.data?.url) {
+                            urlInput.value = data.data.url;
+                            statusDiv.innerText = '✅ Uploaded successfully!';
+                            if (previewImg) {
+                              previewImg.src = data.data.url.startsWith('/') ? `${apiBase}${data.data.url}` : data.data.url;
+                              previewImg.style.display = 'block';
+                            }
+                          } else {
+                            throw new Error(data.error || 'Upload error');
+                          }
+                        } catch (err) {
+                          statusDiv.innerText = '❌ Upload failed: ' + err.message;
+                        }
+                      });
+                    </script>
+                  );
+                }
+
+                if (field.type === 'repeater') {
+                  let itemsArray = [];
+                  try {
+                    if (Array.isArray(value)) {
+                      itemsArray = value;
+                    } else if (typeof value === 'string' && value.trim() && value.trim() !== 'null') {
+                      if (value.startsWith('[')) {
+                        itemsArray = JSON.parse(value);
+                      } else {
+                        itemsArray = value.split(',').map((s: string) => s.trim()).filter(Boolean);
+                      }
+                    }
+                  } catch (e) {
+                    console.error('Failed to parse repeater value', e);
+                  }
+                  
+                  return (
+                    <div class="form-group">
+                      <label>{field.label}</label>
+                      <div class="tag-input-row">
+                        <input 
+                          type="text" 
+                          id={`add-input-${field.name}`} 
+                          placeholder="Type an item (e.g. React) and press Add" 
+                        />
+                        <button 
+                          type="button" 
+                          class="btn btn-secondary" 
+                          id={`btn-add-${field.name}`}
+                        >
+                          Add
+                        </button>
+                      </div>
+                      <input 
+                        type="hidden" 
+                        name={field.name} 
+                        id={`input-${field.name}`} 
+                        value={JSON.stringify(itemsArray)} 
+                      />
+                      <div class="tag-list-container" id={`list-container-${field.name}`}></div>
+
+                      <script is:inline define:vars={{ fieldName: field.name, initialItems: itemsArray }}>
+                        const hiddenInput = document.getElementById(`input-${fieldName}`);
+                        const addInput = document.getElementById(`add-input-${fieldName}`);
+                        const addBtn = document.getElementById(`btn-add-${fieldName}`);
+                        const listContainer = document.getElementById(`list-container-${fieldName}`);
+
+                        let items = [...initialItems];
+
+                        function renderTags() {
+                          if (!listContainer) return;
+                          listContainer.innerHTML = '';
+                          items.forEach((item, index) => {
+                            const tag = document.createElement('div');
+                            tag.className = 'tag-item';
+                            tag.innerHTML = `
+                              <span>${item}</span>
+                              <button type="button" data-index="${index}">&times;</button>
+                            `;
+                            listContainer.appendChild(tag);
+                          });
+                          if (hiddenInput) {
+                            hiddenInput.value = JSON.stringify(items);
+                          }
+                        }
+
+                        addInput?.addEventListener('keydown', (e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addBtn?.click();
+                          }
+                        });
+
+                        addBtn?.addEventListener('click', () => {
+                          const val = addInput.value.trim();
+                          if (val && !items.includes(val)) {
+                            items.push(val);
+                            addInput.value = '';
+                            renderTags();
+                          }
+                        });
+
+                        listContainer?.addEventListener('click', (e) => {
+                          const btn = e.target.closest('button');
+                          if (btn && btn.type === 'button') {
+                            const index = parseInt(btn.getAttribute('data-index'), 10);
+                            items.splice(index, 1);
+                            renderTags();
+                          }
+                        });
+
+                        renderTags();
+                      </script>
+                    </div>
+                  );
+                }
+
+                if (field.type === 'date') {
+                  return (
+                    <div class="form-group">
+                      <label for={`input-${field.name}`}>{field.label}</label>
+                      <input 
+                        type="date" 
+                        name={field.name} 
+                        id={`input-${field.name}`} 
+                        value={value} 
+                        required={field.required}
+                      />
+                    </div>
+                  );
+                }
+
+                if (field.type === 'richtext') {
+                  return (
+                    <div class="form-group">
+                      <label for={`input-${field.name}`}>{field.label}</label>
+                      <textarea 
+                        name={field.name} 
+                        id={`input-${field.name}`} 
+                        rows="15" 
+                        required={field.required}
+                        style="resize: vertical; font-family: monospace; line-height: 1.6;"
+                      >{value}</textarea>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div class="form-group">
+                    <label for={`input-${field.name}`}>{field.label}</label>
+                    <input 
+                      type="text" 
+                      name={field.name} 
+                      id={`input-${field.name}`} 
+                      value={value} 
+                      required={field.required}
+                    />
+                  </div>
+                );
+              })}
+
+              <div class="form-actions">
+                {action === 'edit' ? (
+                  <button 
+                    type="submit" 
+                    name="_action" 
+                    value="delete" 
+                    class="btn btn-danger"
+                    onclick="return confirm('Are you sure you want to soft delete this item?')"
+                  >
+                    Delete Item
+                  </button>
+                ) : (
+                  <div></div>
+                )}
+                
+                <div class="form-actions-right">
+                  <a href={`/admin/content/${type}`} class="btn btn-secondary">Cancel</a>
+                  <button type="submit" name="_action" value="save" class="btn class-button btn-primary">Save Changes</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    ) : (
+      // LIST VIEW
+      <div>
+        <section class="hero-section">
+          <div>
+            <span class="hero-eyebrow">Content Type</span>
+            <h1 class="hero-title">{activeSchema.label}<span>.</span></h1>
+            <p class="hero-subtitle">Edge-rendered records populated from D1 database schema.</p>
+          </div>
+          <a href={`/admin/content/${type}?action=new`} class="btn btn-primary">+ Add New</a>
+        </section>
+
+        <div class="table-card">
+          {items.length === 0 ? (
+            <div class="empty-state">
+              <p>No items found. Click "+ Add New" to create the first record.</p>
+            </div>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  {activeSchema.fields.slice(0, 3).map((field: any) => (
+                    <th>{field.label}</th>
+                  ))}
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr>
+                    <td style="font-family: monospace; font-size: 12px; color: var(--text-muted);">{item.id.slice(0, 8)}...</td>
+                    {activeSchema.fields.slice(0, 3).map((field: any) => {
+                      const val = item[field.name];
+                      if (typeof val === 'boolean') {
+                        return <td>{val ? '🟢 Yes' : '🔴 No'}</td>;
+                      }
+                      if (field.type === 'image' && val) {
+                        const resolvedVal = val.startsWith('/') ? `${API_BASE}${val}` : val;
+                        return <td><img src={resolvedVal} style="height: 36px; border-radius: 6px; border: 1px solid var(--border-subtle);" /></td>;
+                      }
+                      return <td>{val}</td>;
+                    })}
+                    <td style="font-size: 12px; color: var(--text-muted);">{new Date(item.created_at).toLocaleDateString()}</td>
+                    <td class="action-links">
+                      <a href={`/admin/content/${type}?action=edit&id=${item.id}`}>Edit</a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    )}
+  </div>
+
+  <!-- Media Library Selector Modal -->
+  <div id="media-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Select Image from Library</h3>
+        <button type="button" class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-search">
+        <input type="text" id="modal-search-input" placeholder="Search images..." style="width: 100%; background-color: rgba(10, 10, 10, 0.8); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 16px; color: var(--text-white);" />
+      </div>
+      <div class="modal-grid" id="modal-media-grid">
+        <!-- Media items will be loaded dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script is:inline define:vars={{ apiBase: API_BASE, owner: session }}>
+    const mediaModal = document.getElementById('media-modal');
+    const modalGrid = document.getElementById('modal-media-grid');
+    const searchInput = document.getElementById('modal-search-input');
+    const closeBtn = document.querySelector('.close-modal-btn');
+    
+    let activeFieldInput = null;
+    let activeFieldPreview = null;
+    let allMediaItems = [];
+
+    // Open Modal and Load Images
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.btn-choose-library');
+      if (!btn) return;
+      
+      const fieldName = btn.getAttribute('data-field');
+      activeFieldInput = document.getElementById(`input-${fieldName}`);
+      activeFieldPreview = document.getElementById(`preview-${fieldName}`);
+      
+      mediaModal.style.display = 'flex';
+      await loadModalMedia();
+    });
+
+    // Close Modal
+    closeBtn.addEventListener('click', () => {
+      mediaModal.style.display = 'none';
+    });
+    
+    // Close on overlay click
+    mediaModal.addEventListener('click', (e) => {
+      if (e.target === mediaModal) {
+        mediaModal.style.display = 'none';
+      }
+    });
+
+    // Search filter
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.toLowerCase().trim();
+      renderModalItems(allMediaItems.filter(item => item.key.toLowerCase().includes(q)));
+    });
+
+    async function loadModalMedia() {
+      modalGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">Loading media...</div>';
+      try {
+        const res = await fetch(`${apiBase}/api/media?owner=${encodeURIComponent(owner)}`);
+        const json = await res.json();
+        allMediaItems = json.data || [];
+        renderModalItems(allMediaItems);
+      } catch (err) {
+        modalGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--danger); padding: 20px;">Failed to load media: ${err.message}</div>`;
+      }
+    }
+
+    // Render modal gallery items
+    function renderModalItems(items) {
+      modalGrid.innerHTML = '';
+      if (items.length === 0) {
+        modalGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">No images found.</div>';
+        return;
+      }
+
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'modal-media-item';
+        const imageUrl = item.url.startsWith('/') ? `${apiBase}${item.url}` : item.url;
+        
+        div.innerHTML = `
+          <div class="modal-media-preview">
+            <img src="${imageUrl}" alt="${item.key}" loading="lazy" />
+          </div>
+          <div class="modal-media-name" title="${item.key}">${item.key}</div>
+        `;
+        
+        div.addEventListener('click', () => {
+          if (activeFieldInput) {
+            activeFieldInput.value = item.url;
+            // Trigger input event to update preview
+            activeFieldInput.dispatchEvent(new Event('input'));
+          }
+          mediaModal.style.display = 'none';
+        });
+        
+        modalGrid.appendChild(div);
+      });
+    }
+  </script>
+
+</body>
+</html>

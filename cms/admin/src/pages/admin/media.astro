@@ -1,0 +1,733 @@
+---
+import { registry } from '../../../../schema/registry';
+
+const API_BASE = (import.meta.env.PUBLIC_API_URL || 'http://127.0.0.1:8787').trim();
+
+// Auth Check
+let session = Astro.cookies.get('cms_session')?.value;
+if (session === 'sister') {
+  session = 'amal';
+}
+if (!session) {
+  return Astro.redirect('/admin');
+}
+
+const contentTypes = Object.values(registry);
+
+const adminName = session === 'salmeen' ? 'Salmeen Hadi' : (session === 'amal' ? 'Amal Hadi' : 'Developer Admin');
+const adminRole = session === 'salmeen' ? 'Salmeen Portfolio' : (session === 'amal' ? 'Amal Portfolio' : 'Cloudflare Access');
+
+// Fetch initial media items
+let mediaItems = [];
+let fetchError = '';
+try {
+  const res = await fetch(`${API_BASE}/api/media?owner=${session}`);
+  if (res.ok) {
+    const json = await res.json();
+    mediaItems = json.data || [];
+  } else {
+    fetchError = `API returned status ${res.status}`;
+  }
+} catch (err: any) {
+  fetchError = err.message;
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Library - CMS Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #050505;
+      --bg-card: rgba(18, 18, 18, 0.6);
+      --border-color: rgba(161, 130, 74, 0.15);
+      --border-subtle: rgba(255, 255, 255, 0.05);
+      --text-main: #f5f5f7;
+      --text-muted: #86868b;
+      --text-white: #ffffff;
+      --accent: #A1824A;
+      --accent-hover: #C4A468;
+      --accent-glow: rgba(161, 130, 74, 0.08);
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Pinned Top Navigation Bar */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 5, 5, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      width: 100%;
+      height: 72px;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-brand span {
+      color: var(--accent);
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s ease;
+      cursor: pointer;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--accent);
+    }
+
+    /* Dropdown Menu */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .nav-dropdown-trigger {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s ease;
+    }
+
+    .nav-dropdown-trigger:hover {
+      color: var(--accent);
+    }
+
+    .nav-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: rgba(10, 10, 10, 0.95);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 8px;
+      min-width: 200px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nav-dropdown:hover .nav-dropdown-menu {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-item {
+      display: block;
+      padding: 10px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(161, 130, 74, 0.1);
+      color: var(--accent);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .user-profile {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .profile-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-white);
+    }
+
+    .profile-role {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .logout-btn {
+      background: none;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .logout-btn:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    /* Main Container */
+    .page-container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(180deg, var(--bg-dark), rgba(161, 130, 74, 0.03));
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 32px;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .hero-title {
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: var(--text-white);
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .hero-title span {
+      color: var(--accent);
+    }
+
+    .hero-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 65ch;
+    }
+
+    /* Drag & Drop Upload Zone */
+    .upload-zone {
+      background: var(--bg-card);
+      border: 1.5px dashed var(--border-color);
+      border-radius: 16px;
+      padding: 48px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(161, 130, 74, 0.04);
+      box-shadow: inset 0 0 24px rgba(161, 130, 74, 0.03);
+    }
+
+    .upload-zone svg {
+      color: var(--accent);
+      margin-bottom: 16px;
+      width: 48px;
+      height: 48px;
+      transition: transform 0.3s ease;
+    }
+
+    .upload-zone:hover svg {
+      transform: translateY(-4px);
+    }
+
+    .upload-zone p {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-white);
+    }
+
+    .upload-zone span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Media Grid */
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 24px;
+    }
+
+    .media-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .media-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-color);
+      box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+    }
+
+    .preview-container {
+      height: 160px;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .preview-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .media-card:hover .preview-container img {
+      transform: scale(1.05);
+    }
+
+    .media-info {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-grow: 1;
+    }
+
+    .media-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .media-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .media-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 9999px;
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-copy {
+      color: var(--text-main);
+    }
+
+    .btn-copy:hover {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #000000;
+    }
+
+    .btn-delete:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .alert-danger {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      background: rgba(10, 10, 10, 0.95);
+      border: 1px solid var(--border-color);
+      color: var(--text-white);
+      padding: 14px 28px;
+      border-radius: 9999px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 1000;
+      display: none;
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(24px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-menu, .user-profile {
+        display: none;
+      }
+      .page-container {
+        padding: 32px 20px;
+        gap: 32px;
+      }
+      .hero-title {
+        font-size: 36px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-container">
+      <a href="/admin" class="nav-brand">{session === 'salmeen' ? 'SALMEEN' : 'AMAL'}<span>.</span>CMS</a>
+      
+      <div class="nav-menu">
+        <a href="/admin" class="nav-link">Dashboard</a>
+        
+        <div class="nav-dropdown">
+          <button class="nav-dropdown-trigger">
+            Content Types <span>▼</span>
+          </button>
+          <div class="nav-dropdown-menu">
+            {contentTypes.filter((s: any) => s.slug !== 'media').map((schema: any) => (
+              <a href={`/admin/content/${schema.slug}`} class="dropdown-item">
+                {schema.label}
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <a href="/admin/media" class="nav-link active">Media Library</a>
+      </div>
+
+      <div class="nav-right">
+        <div class="user-profile">
+          <span class="profile-name">{adminName}</span>
+          <span class="profile-role">{adminRole}</span>
+        </div>
+        <form method="POST">
+          <input type="hidden" name="action" value="logout" />
+          <button type="submit" class="logout-btn">Log out</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-container">
+    <section class="hero-section">
+      <span class="hero-eyebrow">Digital Assets</span>
+      <h1 class="hero-title">Media Library<span>.</span></h1>
+      <p class="hero-subtitle">Upload and copy relative paths of images to use in the portfolio content editor.</p>
+    </section>
+
+    {fetchError && <div class="alert-danger">⚠️ Error loading Media Library: {fetchError}</div>}
+
+    <!-- Upload Zone -->
+    <div class="upload-zone" id="drop-zone">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      <p>Drag & drop images here, or click to upload</p>
+      <span>Supports PNG, JPG, WEBP, GIF, SVG</span>
+      <input type="file" id="file-input" style="display: none;" accept="image/*" multiple />
+    </div>
+
+    <!-- Media Grid -->
+    <div class="media-grid" id="media-grid">
+      {mediaItems.map((item: any) => {
+        const fileSizeFormatted = item.size > 1024 * 1024 
+          ? `${(item.size / (1024 * 1024)).toFixed(1)} MB` 
+          : `${(item.size / 1024).toFixed(0)} KB`;
+        const uploadDate = new Date(item.uploaded).toLocaleDateString();
+        const imageUrl = item.url.startsWith('/') ? `${API_BASE}${item.url}` : item.url;
+        
+        return (
+          <div class="media-card" data-key={item.key} id={`card-${item.key.replace(/[^a-zA-Z0-9]/g, '_')}`}>
+            <div class="preview-container">
+              <img src={imageUrl} alt={item.key} loading="lazy" />
+            </div>
+            <div class="media-info">
+              <span class="media-name" title={item.key}>{item.key}</span>
+              <div class="media-meta">
+                <span>{fileSizeFormatted}</span>
+                <span>{uploadDate}</span>
+              </div>
+              <div class="media-actions">
+                <button class="action-btn btn-copy" data-url={item.url}>
+                  🔗 Copy Path
+                </button>
+                <button class="action-btn btn-delete" data-key={item.key}>
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied to Clipboard!</div>
+
+  <script is:inline define:vars={{ apiBase: API_BASE, owner: session }}>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const mediaGrid = document.getElementById('media-grid');
+    const toast = document.getElementById('toast');
+
+    // Trigger click on file input
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // Drag-over styling
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) uploadFiles(files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const files = e.target.files;
+      if (files.length > 0) uploadFiles(files);
+    });
+
+    // Toast show helper
+    function showToast(message) {
+      toast.innerText = message;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2000);
+    }
+
+    // Upload files handler
+    async function uploadFiles(files) {
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('owner', owner);
+
+        try {
+          const res = await fetch(`${apiBase}/api/media/upload`, {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer mock_admin_token'
+            },
+            body: formData
+          });
+          const data = await res.json();
+          if (data.data?.url) {
+            showToast(`✅ Uploaded ${file.name} successfully!`);
+            addNewCard(data.data);
+          } else {
+            showToast(`❌ Failed to upload ${file.name}: ${data.error}`);
+          }
+        } catch (err) {
+          showToast(`❌ Error: ${err.message}`);
+        }
+      }
+    }
+
+    // Dynamic UI append helper
+    function addNewCard(item) {
+      const keyId = item.key.replace(/[^a-zA-Z0-9]/g, '_');
+      // Prevent duplicates in UI
+      if (document.getElementById(`card-${keyId}`)) return;
+
+      const card = document.createElement('div');
+      card.className = 'media-card';
+      card.id = `card-${keyId}`;
+      card.setAttribute('data-key', item.key);
+
+      const imageUrl = item.url.startsWith('/') ? `${apiBase}${item.url}` : item.url;
+      card.innerHTML = `
+        <div class="preview-container">
+          <img src="${imageUrl}" alt="${item.key}" loading="lazy" />
+        </div>
+        <div class="media-info">
+          <span class="media-name" title="${item.key}">${item.key}</span>
+          <div class="media-meta">
+            <span>Just now</span>
+            <span>Today</span>
+          </div>
+          <div class="media-actions">
+            <button class="action-btn btn-copy" data-url="${item.url}">
+              🔗 Copy Path
+            </button>
+            <button class="action-btn btn-delete" data-key="${item.key}">
+              🗑️ Delete
+            </button>
+          </div>
+        </div>
+      `;
+      mediaGrid.insertBefore(card, mediaGrid.firstChild);
+    }
+
+    // Event delegation for actions (Copy & Delete)
+    mediaGrid.addEventListener('click', async (e) => {
+      const btnCopy = e.target.closest('.btn-copy');
+      const btnDelete = e.target.closest('.btn-delete');
+
+      if (btnCopy) {
+        const relativeUrl = btnCopy.getAttribute('data-url');
+        try {
+          await navigator.clipboard.writeText(relativeUrl);
+          showToast('📋 Copied relative path to Clipboard!');
+        } catch (err) {
+          showToast('❌ Copy failed');
+        }
+      }
+
+      if (btnDelete) {
+        const key = btnDelete.getAttribute('data-key');
+        if (!confirm(`Are you sure you want to delete ${key}?`)) return;
+
+        try {
+          const res = await fetch(`${apiBase}/api/media/${encodeURIComponent(key)}?owner=${encodeURIComponent(owner)}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': 'Bearer mock_admin_token'
+            }
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast('🗑️ File deleted successfully!');
+            const keyId = key.replace(/[^a-zA-Z0-9]/g, '_');
+            const card = document.getElementById(`card-${keyId}`);
+            if (card) {
+              card.style.opacity = '0';
+              card.style.transform = 'scale(0.9)';
+              card.style.transition = 'all 0.3s ease';
+              setTimeout(() => card.remove(), 300);
+            }
+          } else {
+            showToast(`❌ Delete failed: ${data.error}`);
+          }
+        } catch (err) {
+          showToast(`❌ Delete error: ${err.message}`);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+

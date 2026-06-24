@@ -1,0 +1,1 @@
+ALTER TABLE heroes ADD COLUMN hide_chatbot INTEGER;

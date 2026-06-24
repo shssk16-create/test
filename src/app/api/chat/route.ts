@@ -10,6 +10,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         message,
         history,
+        modelName: "gemini-1.5-flash",
         metadata: {
           platform: "Salmeen Portfolio",
           version: "7.0"
