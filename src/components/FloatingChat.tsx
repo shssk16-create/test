@@ -59,7 +59,7 @@ export default function FloatingChat({ owner = 'salmeen' }: { owner?: string }) 
     async function fetchConfig() {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
       try {
-        const res = await fetch(`${apiBase}/api/heroes?owner=${owner}`);
+        const res = await fetch(`${apiBase}/api/heroes?owner=${owner}`, { cache: 'no-store' });
         if (res.ok) {
           const json = await res.json();
           if (json.data && Array.isArray(json.data) && json.data.length > 0) {

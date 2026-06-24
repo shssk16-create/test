@@ -28,6 +28,8 @@ if (!session) {
   return Astro.redirect('/admin');
 }
 
+const AUTH_TOKEN = session === 'salmeen' ? 'Bearer mock_admin_token_salmeen' : 'Bearer mock_admin_token_amal';
+
 const { type } = Astro.params;
 const activeSchema = Object.values(registry).find((s: any) => s.slug === type);
 
@@ -74,7 +76,7 @@ if (Astro.request.method === 'POST') {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer mock_admin_token'
+            'Authorization': AUTH_TOKEN
           },
           body: JSON.stringify(payload)
         });
@@ -87,7 +89,7 @@ if (Astro.request.method === 'POST') {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer mock_admin_token'
+            'Authorization': AUTH_TOKEN
           },
           body: JSON.stringify(payload)
         });
@@ -102,7 +104,7 @@ if (Astro.request.method === 'POST') {
       const res = await fetch(`${API_BASE}/api/${type}/${itemId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': 'Bearer mock_admin_token'
+          'Authorization': AUTH_TOKEN
         }
       });
       const data = await res.json();
@@ -120,13 +122,26 @@ let editItem: any = null;
 
 try {
   if (action === 'edit' && itemId) {
-    const res = await fetch(`${API_BASE}/api/${type}/${itemId}`);
+    const res = await fetch(`${API_BASE}/api/${type}/${itemId}`, {
+      headers: {
+        'Authorization': AUTH_TOKEN
+      },
+      cache: 'no-store'
+    });
     const data = await res.json();
     if (data.data) {
+      if (data.data.owner !== session) {
+        return Astro.redirect('/admin');
+      }
       editItem = data.data;
     }
   } else if (!action) {
-    const res = await fetch(`${API_BASE}/api/${type}?owner=${session}`);
+    const res = await fetch(`${API_BASE}/api/${type}?owner=${session}`, {
+      headers: {
+        'Authorization': AUTH_TOKEN
+      },
+      cache: 'no-store'
+    });
     const data = await res.json();
     if (data.data) {
       items = data.data;
@@ -816,6 +831,7 @@ const adminRole = session === 'salmeen' ? 'Salmeen Portfolio' : (session === 'am
         </div>
 
         <a href="/admin/media" class="nav-link">Media Library</a>
+        <a href={session === 'salmeen' ? 'https://salmeen-hadi-6zf.pages.dev' : 'https://amal-hadi.pages.dev'} target="_blank" rel="noopener noreferrer" class="nav-link">View Live Site</a>
       </div>
 
       <div class="nav-right">
@@ -928,7 +944,7 @@ const adminRole = session === 'salmeen' ? 'Salmeen Portfolio' : (session === 'am
                       </div>
                     </div>
 
-                    <script is:inline define:vars={{ fieldName: field.name, apiBase: API_BASE, owner: session }}>
+                    <script is:inline define:vars={{ fieldName: field.name, apiBase: API_BASE, owner: session, authToken: session === 'salmeen' ? 'mock_admin_token_salmeen' : 'mock_admin_token_amal' }}>
                       const fileInput = document.getElementById(`file-${fieldName}`);
                       const urlInput = document.getElementById(`input-${fieldName}`);
                       const uploadBtn = document.getElementById(`btn-upload-${fieldName}`);
@@ -964,7 +980,7 @@ const adminRole = session === 'salmeen' ? 'Salmeen Portfolio' : (session === 'am
                           const res = await fetch(`${apiBase}/api/media/upload`, {
                             method: 'POST',
                             headers: {
-                              'Authorization': 'Bearer mock_admin_token'
+                              'Authorization': `Bearer ${authToken}`
                             },
                             body: formData
                           });
@@ -1062,10 +1078,32 @@ const adminRole = session === 'salmeen' ? 'Salmeen Portfolio' : (session === 'am
 
                         addBtn?.addEventListener('click', () => {
                           const val = addInput.value.trim();
-                          if (val && !items.includes(val)) {
-                            items.push(val);
+                          if (val) {
+                            const parts = val.split(',').map(s => s.trim()).filter(Boolean);
+                            parts.forEach(part => {
+                              if (!items.includes(part)) {
+                                items.push(part);
+                              }
+                            });
                             addInput.value = '';
                             renderTags();
+                          }
+                        });
+
+                        const form = addInput?.closest('form');
+                        form?.addEventListener('submit', () => {
+                          const val = addInput.value.trim();
+                          if (val) {
+                            const parts = val.split(',').map(s => s.trim()).filter(Boolean);
+                            parts.forEach(part => {
+                              if (!items.includes(part)) {
+                                items.push(part);
+                              }
+                            });
+                            addInput.value = '';
+                            if (hiddenInput) {
+                              hiddenInput.value = JSON.stringify(items);
+                            }
                           }
                         });
 

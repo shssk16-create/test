@@ -1,11 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Moon, Sun, Award, Layout } from "lucide-react";
+import { ArrowRight, ArrowLeft, Moon, Sun, Award, Layout, Sparkles, Lock } from "lucide-react";
 import Link from "next/link";
 import FloatingChat from "@/components/FloatingChat";
 import { WorksSection } from "@/components/WorksSection";
 import AmalPortfolioPage from "../amal/portfolio/page";
+import ParticleNetwork from "@/components/ParticleNetwork";
+import { useSEO } from "@/hooks/useSEO";
 
 export default function PortfolioRoute() {
   const isAmalDeploy = process.env.NEXT_PUBLIC_OWNER === 'amal';
@@ -21,6 +23,28 @@ function Portfolio() {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
+  useSEO('salmeen', lang, 'portfolio');
+
+  const [authorized, setAuthorized] = useState(false);
+  const [passcode, setPasscode] = useState("");
+  const [passcodeError, setPasscodeError] = useState("");
+
+  useEffect(() => {
+    if (localStorage.getItem('portfolio_auth_salmeen') === 'true') {
+      setAuthorized(true);
+    }
+  }, []);
+
+  const handleVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passcode.trim() === 'salmen13') {
+      localStorage.setItem('portfolio_auth_salmeen', 'true');
+      setAuthorized(true);
+    } else {
+      setPasscodeError(isAr ? 'رمز مرور خاطئ، يرجى المحاولة مرة أخرى.' : 'Incorrect passcode, please try again.');
+    }
+  };
+
   useEffect(() => { 
     setMounted(true); 
     const l = localStorage.getItem('sk_lang'); 
@@ -34,7 +58,6 @@ function Portfolio() {
     if (mounted) {
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
       document.documentElement.lang = lang;
-      document.title = lang === 'ar' ? "سالمين هادي | معرض الأعمال" : "Salmeen Hadi | Portfolio";
     }
   }, [lang, mounted]);
   
@@ -45,6 +68,55 @@ function Portfolio() {
   const isDark = theme === 'dark';
 
   if(!mounted) return null;
+
+  if (!authorized) {
+    return (
+      <div className={`fixed inset-0 z-[9999] flex items-center justify-center ${isDark ? 'bg-[#050505]' : 'bg-[#F9F8F6]'} overflow-hidden`} dir={isAr ? 'rtl' : 'ltr'}>
+        <ParticleNetwork />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-[#A1824A]/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
+        <div className={`flex flex-col gap-6 p-8 max-w-sm w-full mx-4 rounded-3xl border ${isDark ? 'border-white/10 bg-black/40' : 'border-stone-200 bg-white'} backdrop-blur-xl text-center shadow-2xl relative z-10`}>
+          <div className="flex justify-center">
+            <div className="w-16 h-16 bg-[#A1824A]/10 border border-[#A1824A]/30 rounded-full flex items-center justify-center text-[#A1824A] shadow-[0_0_20px_rgba(161,130,74,0.2)]">
+              <Sparkles size={28} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>
+              {isAr ? 'موقع خاص' : 'Private Site'}
+            </h2>
+            <p className={`text-xs ${isDark ? 'text-stone-400' : 'text-stone-500'} leading-relaxed`}>
+              {isAr 
+                ? 'هذا المعرض محمي برمز مرور. يرجى إدخال رمز المرور للمتابعة.' 
+                : 'This portfolio is passcode protected. Please enter the passcode to proceed.'}
+            </p>
+          </div>
+          <form onSubmit={handleVerify} className="space-y-4">
+            <div className="space-y-1">
+              <input
+                type="password"
+                value={passcode}
+                onChange={(e) => { setPasscode(e.target.value); setPasscodeError(""); }}
+                placeholder={isAr ? 'أدخل رمز المرور...' : 'Enter passcode...'}
+                className={`w-full px-5 py-3 rounded-full text-center text-sm font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white placeholder-stone-500 focus:border-[#A1824A]' : 'bg-stone-50 border-stone-200 text-stone-900 placeholder-stone-400 focus:border-[#A1824A]'} focus:outline-none transition-all`}
+                autoFocus
+              />
+              {passcodeError && (
+                <p className="text-[10px] text-red-500 font-bold mt-1">
+                  {passcodeError}
+                </p>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="w-full py-3 rounded-full bg-[#A1824A] hover:bg-yellow-600 text-black text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(161,130,74,0.3)] cursor-pointer"
+            >
+              {isAr ? 'دخول' : 'Access'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className={`min-h-[100dvh] ${isDark ? 'bg-[#050505] text-white' : 'bg-[#F9F8F6] text-[#15110E]'} selection:bg-[#A1824A] pb-32 relative overflow-hidden ${isAr ? 'font-alexandria' : 'font-sans'} transition-colors duration-700`} dir={isAr ? 'rtl' : 'ltr'}>

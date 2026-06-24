@@ -11,7 +11,7 @@ export interface Env {
   CMS_STATE: DurableObjectNamespace;
 }
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { authOwner?: 'salmeen' | 'amal' } }>();
 
 // Allow CORS for all API routes
 app.use('/api/*', cors({
@@ -20,16 +20,36 @@ app.use('/api/*', cors({
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 }));
 
-// 1. Auth Middleware Stub
-// Restricts all write/modify API routes without authentication
+// Helper to extract owner from authorization header securely
+function getOwnerFromAuth(authHeader: string | undefined): 'salmeen' | 'amal' | null {
+  if (!authHeader) return null;
+  if (authHeader === 'Bearer mock_admin_token_salmeen') return 'salmeen';
+  if (authHeader === 'Bearer mock_admin_token_amal') return 'amal';
+  if (authHeader === 'Bearer mock_admin_token') return 'salmeen'; // fallback compatibility
+  return null;
+}
+
+// 1. Auth Middleware
+// Restricts write operations, media actions, locks, and drafts to authenticated users
 app.use('/api/*', async (c, next) => {
+  const path = c.req.path;
   const method = c.req.method;
-  if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method) && !c.req.path.endsWith('/media/download')) {
+
+  const isPublicGet = method === 'GET' && (
+    path.endsWith('/media/download') ||
+    path === '/api/heroes' ||
+    path === '/api/projects' ||
+    path === '/api/certificates' ||
+    path === '/api/logos'
+  );
+
+  if (!isPublicGet) {
     const authHeader = c.req.header('Authorization');
-    // Note: Verify against the mock_admin_token secret.
-    if (!authHeader || authHeader !== 'Bearer mock_admin_token') {
+    const resolvedOwner = getOwnerFromAuth(authHeader);
+    if (!resolvedOwner) {
       return c.json({ data: null, meta: null, error: 'Unauthorized: Session token missing or invalid' }, 401);
     }
+    c.set('authOwner', resolvedOwner);
   }
   await next();
 });
@@ -85,13 +105,16 @@ Object.entries(registry).forEach(([schemaKey, schemaVal]) => {
     const search = query.search || '';
     const sortBy = query.sortBy || 'created_at';
     const sortOrder = query.sortOrder || 'DESC';
-    const owner = query.owner || 'salmeen';
+    const authOwner = c.var.authOwner;
+    const owner = authOwner || query.owner || 'salmeen';
 
-    // Check Cache Layer (KV)
+    // Check Cache Layer (KV) - Bypass KV cache for authenticated admin reads
     const cacheKey = `list:${type}:${page}:${limit}:${search}:${sortBy}:${sortOrder}:${owner}`;
-    const cached = await c.env.KV.get(cacheKey);
-    if (cached) {
-      return c.json(JSON.parse(cached));
+    if (!authOwner) {
+      const cached = await c.env.KV.get(cacheKey);
+      if (cached) {
+        return c.json(JSON.parse(cached));
+      }
     }
 
     let sql = `SELECT * FROM ${type} WHERE is_deleted = 0 AND owner = ?`;
@@ -159,8 +182,14 @@ Object.entries(registry).forEach(([schemaKey, schemaVal]) => {
   // Single Item (GET /api/[type]/:id)
   app.get(`/api/${type}/:id`, async (c) => {
     const id = c.req.param('id');
+    const authOwner = c.var.authOwner;
     try {
-      const item = await c.env.DB.prepare(`SELECT * FROM ${type} WHERE id = ? AND is_deleted = 0`).bind(id).first();
+      let item;
+      if (authOwner) {
+        item = await c.env.DB.prepare(`SELECT * FROM ${type} WHERE id = ? AND owner = ? AND is_deleted = 0`).bind(id, authOwner).first();
+      } else {
+        item = await c.env.DB.prepare(`SELECT * FROM ${type} WHERE id = ? AND is_deleted = 0`).bind(id).first();
+      }
       if (!item) {
         return c.json({ data: null, meta: null, error: 'Item not found' }, 404);
       }
@@ -181,7 +210,8 @@ Object.entries(registry).forEach(([schemaKey, schemaVal]) => {
 
       const id = crypto.randomUUID();
       const insertData = parseResult.data as Record<string, any>;
-      const owner = body.owner || 'salmeen';
+      const authOwner = c.var.authOwner!;
+      const owner = authOwner;
       const keys = ['id', 'owner', ...Object.keys(insertData)];
       const placeholders = keys.map(() => '?').join(', ');
 
@@ -211,10 +241,11 @@ Object.entries(registry).forEach(([schemaKey, schemaVal]) => {
   // Update (PATCH /api/[type]/:id)
   app.patch(`/api/${type}/:id`, async (c) => {
     const id = c.req.param('id');
+    const authOwner = c.var.authOwner!;
     try {
-      const exists = await c.env.DB.prepare(`SELECT id FROM ${type} WHERE id = ? AND is_deleted = 0`).bind(id).first();
+      const exists = await c.env.DB.prepare(`SELECT id FROM ${type} WHERE id = ? AND owner = ? AND is_deleted = 0`).bind(id, authOwner).first();
       if (!exists) {
-        return c.json({ data: null, meta: null, error: 'Item not found' }, 404);
+        return c.json({ data: null, meta: null, error: 'Item not found or unauthorized' }, 404);
       }
 
       const body = await c.req.json();
@@ -239,9 +270,9 @@ Object.entries(registry).forEach(([schemaKey, schemaVal]) => {
         values.push(formattedVal === undefined ? null : formattedVal);
       }
 
-      values.push(id);
+      values.push(id, authOwner);
 
-      const sql = `UPDATE ${type} SET ${setClauses.join(', ')} WHERE id = ? AND is_deleted = 0`;
+      const sql = `UPDATE ${type} SET ${setClauses.join(', ')} WHERE id = ? AND owner = ? AND is_deleted = 0`;
       await c.env.DB.prepare(sql).bind(...values).run();
 
       await invalidateCache(c.env.KV, type);
@@ -256,8 +287,12 @@ Object.entries(registry).forEach(([schemaKey, schemaVal]) => {
   // Soft Delete (DELETE /api/[type]/:id)
   app.delete(`/api/${type}/:id`, async (c) => {
     const id = c.req.param('id');
+    const authOwner = c.var.authOwner!;
     try {
-      await c.env.DB.prepare(`UPDATE ${type} SET is_deleted = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND is_deleted = 0`).bind(id).run();
+      const res = await c.env.DB.prepare(`UPDATE ${type} SET is_deleted = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND owner = ? AND is_deleted = 0`).bind(id, authOwner).run();
+      if (res.meta.changes === 0) {
+        return c.json({ data: null, meta: null, error: 'Item not found or unauthorized' }, 404);
+      }
       await invalidateCache(c.env.KV, type);
       return c.json({ data: { id, success: true }, meta: null, error: null });
     } catch (e: any) {
@@ -274,7 +309,8 @@ app.post('/api/media/upload', async (c) => {
     if (!file) {
       return c.json({ data: null, meta: null, error: 'No file uploaded' }, 400);
     }
-    const owner = formData.get('owner') as string || 'salmeen';
+    const authOwner = c.var.authOwner!;
+    const owner = authOwner;
 
     const arrayBuffer = await file.arrayBuffer();
     const content = new Uint8Array(arrayBuffer);
@@ -356,7 +392,8 @@ app.get('/api/media/download', async (c) => {
 
 // 4.5 Media Library Routes (GET /api/media and DELETE /api/media/:key)
 app.get('/api/media', async (c) => {
-  const owner = c.req.query('owner') || 'salmeen';
+  const authOwner = c.var.authOwner!;
+  const owner = authOwner;
   try {
     // Dynamic backfill check: if the database is empty but R2 has items, seed D1
     const countRes = await c.env.DB.prepare('SELECT COUNT(*) as count FROM media WHERE is_deleted = 0').first<{ count: number }>();
@@ -395,7 +432,8 @@ app.get('/api/media', async (c) => {
 
 app.delete('/api/media/:key', async (c) => {
   const key = c.req.param('key');
-  const owner = c.req.query('owner') || 'salmeen';
+  const authOwner = c.var.authOwner!;
+  const owner = authOwner;
   try {
     // Soft delete in D1
     await c.env.DB.prepare(

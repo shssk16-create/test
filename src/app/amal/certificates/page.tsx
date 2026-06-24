@@ -1,10 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ArrowRight, ArrowLeft, Award, Moon, Sun, ZoomIn, X } from "lucide-react";
+import { Sparkles, ArrowRight, ArrowLeft, Award, Moon, Sun, ZoomIn, X, Lock } from "lucide-react";
 import Link from "next/link";
 import Tilt from "react-parallax-tilt";
 import FloatingChat from "@/components/FloatingChat";
+import ParticleNetwork from "@/components/ParticleNetwork";
+import { useSEO } from "@/hooks/useSEO";
 
 export function cleanCdnUrl(url: string, apiBase: string) {
   if (!url) return "";
@@ -216,6 +218,8 @@ export default function AmalCertificates() {
   const [mounted, setMounted] = useState(false);
   const [selectedImg, setSelectedImg] = useState<string | null>(null);
 
+  useSEO('amal', lang, 'certificates');
+
   const [primaryCert, setPrimaryCert] = useState<CertificateProps>(fallbackPrimaryCert);
   const [otherCerts, setOtherCerts] = useState<CertificateProps[]>(fallbackOtherCerts);
 
@@ -232,7 +236,6 @@ export default function AmalCertificates() {
     if (mounted) {
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
       document.documentElement.lang = lang;
-      document.title = lang === 'ar' ? "أمل هادي | الشهادات" : "Amal Hadi | Certificates";
     }
   }, [lang, mounted]);
 
@@ -242,7 +245,7 @@ export default function AmalCertificates() {
     async function fetchCertificates() {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
       try {
-        const res = await fetch(`${apiBase}/api/certificates?owner=amal`);
+        const res = await fetch(`${apiBase}/api/certificates?owner=amal`, { cache: 'no-store' });
         if (!res.ok) {
           throw new Error(`Failed to fetch: ${res.statusText}`);
         }
@@ -298,7 +301,77 @@ export default function AmalCertificates() {
   const primaryName = isAr ? primaryCert.name_ar : primaryCert.name_en;
   const primaryIssuer = isAr ? primaryCert.issuer_ar : primaryCert.issuer_en;
 
+  const [authorized, setAuthorized] = useState(true);
+  const [passcode, setPasscode] = useState("");
+  const [passcodeError, setPasscodeError] = useState("");
+
+  useEffect(() => {
+    if (localStorage.getItem('portfolio_auth_amal') === 'true') {
+      setAuthorized(true);
+    }
+  }, []);
+
+  const handleVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanPasscode = passcode.trim();
+    if (cleanPasscode === 'amal123' || cleanPasscode === 'sister123') {
+      localStorage.setItem('portfolio_auth_amal', 'true');
+      setAuthorized(true);
+    } else {
+      setPasscodeError(isAr ? 'رمز مرور خاطئ، يرجى المحاولة مرة أخرى.' : 'Incorrect passcode, please try again.');
+    }
+  };
+
   if(!mounted) return null;
+
+  if (!authorized) {
+    return (
+      <div className={`fixed inset-0 z-[9999] flex items-center justify-center ${isDark ? 'bg-[#2C3947]' : 'bg-[#E8EDF2]'} overflow-hidden`} dir={isAr ? 'rtl' : 'ltr'}>
+        <ParticleNetwork color="#C2A56D" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-[#C2A56D]/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
+        <div className={`flex flex-col gap-6 p-8 max-w-sm w-full mx-4 rounded-3xl border ${isDark ? 'border-white/10 bg-black/40' : 'border-[#547A95]/20 bg-[#E8EDF2]'} backdrop-blur-xl text-center shadow-2xl relative z-10`}>
+          <div className="flex justify-center">
+            <div className="w-16 h-16 bg-[#C2A56D]/10 border border-[#C2A56D]/30 rounded-full flex items-center justify-center text-[#C2A56D] shadow-[0_0_20px_rgba(194,165,109,0.2)]">
+              <Sparkles size={28} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>
+              {isAr ? 'موقع خاص' : 'Private Site'}
+            </h2>
+            <p className={`text-xs ${isDark ? 'text-stone-300' : 'text-stone-600'} leading-relaxed`}>
+              {isAr 
+                ? 'هذا المعرض محمي برمز مرور. يرجى إدخال رمز المرور للمتابعة.' 
+                : 'This portfolio is passcode protected. Please enter the passcode to proceed.'}
+            </p>
+          </div>
+          <form onSubmit={handleVerify} className="space-y-4">
+            <div className="space-y-1">
+              <input
+                type="password"
+                value={passcode}
+                onChange={(e) => { setPasscode(e.target.value); setPasscodeError(""); }}
+                placeholder={isAr ? 'أدخل رمز المرور...' : 'Enter passcode...'}
+                className={`w-full px-5 py-3 rounded-full text-center text-sm font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white placeholder-stone-500 focus:border-[#C2A56D]' : 'bg-stone-50 border-[#547A95]/30 text-[#2C3947] placeholder-[#2C3947]/50 focus:border-[#C2A56D]'} focus:outline-none transition-all`}
+                autoFocus
+              />
+              {passcodeError && (
+                <p className="text-[10px] text-red-500 font-bold mt-1">
+                  {passcodeError}
+                </p>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="w-full py-3 rounded-full bg-[#C2A56D] hover:bg-[#b39158] text-black text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(194,165,109,0.3)] cursor-pointer"
+            >
+              {isAr ? 'دخول' : 'Access'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className={`min-h-[100dvh] ${isDark ? 'bg-[#2C3947] text-[#E8EDF2]' : 'bg-[#E8EDF2] text-[#2C3947]'} selection:bg-[#C2A56D] pb-32 relative overflow-hidden ${isAr ? 'font-alexandria' : 'font-sans'} transition-colors duration-700`} dir={isAr ? 'rtl' : 'ltr'}>

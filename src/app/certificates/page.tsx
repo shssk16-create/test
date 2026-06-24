@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ArrowRight, ArrowLeft, Award, Moon, Sun, ZoomIn, X } from "lucide-react";
+import { Sparkles, ArrowRight, ArrowLeft, Award, Moon, Sun, ZoomIn, X, Lock } from "lucide-react";
 import Link from "next/link";
 import Tilt from "react-parallax-tilt";
 import FloatingChat from "@/components/FloatingChat";
+import ParticleNetwork from "@/components/ParticleNetwork";
+import AmalCertificatesPage from "../amal/certificates/page";
+import { useSEO } from "@/hooks/useSEO";
 
 export function cleanCdnUrl(url: string, apiBase: string) {
   if (!url) return "";
@@ -46,11 +49,11 @@ const fallbackPrimaryCert: CertificateProps = {
   id: "cert-primary",
   name_ar: "وثيقة التخرج الأساسية في تقنية البرمجيات",
   name_en: "Primary Graduate Diploma in Software Technology",
-  issuer_ar: "الكلية التقنية",
-  issuer_en: "Technical College",
-  date: "2026-03-01",
+  issuer_ar: "الجامعة الوطنية",
+  issuer_en: "National University",
+  date: "2026-06-01",
   credential_url: "",
-  image: "https://aurateam3.com/wp-content/uploads/2026/03/وثائق-التخرج-طلاب-الكلية-46-_page-0001.webp",
+  image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
   featured: true,
   skills: ["Software Engineering", "Cloud Computing", "Web Architecture", "Databases", "Distributed Systems"],
   description_ar: "تم الحصول على هذه الدرجة العلمية في تخصص تقنية البرمجيات وأنظمة الويب المتكاملة مع التركيز على بناء البنى السحابية وتكامل الأنظمة وريادة الأعمال الرقمية.",
@@ -136,23 +139,23 @@ const fallbackOtherCerts: CertificateProps[] = [
     id: "cert-other-2",
     name_ar: "أخصائي بنية تحتية لـ NVIDIA NIM",
     name_en: "NVIDIA NIM Infrastructure Specialist",
-    issuer_ar: "شريك بيتا لـ NVIDIA NIM",
-    issuer_en: "NVIDIA NIM Beta Partner",
+    issuer_ar: "مجموعة NIM لشركاء البنية التحتية",
+    issuer_en: "NIM Infrastructure Partner Group",
     date: "2026-03-08",
     credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/1748694369861.webp",
+    image: "https://aurateam3.com/wp-content/uploads/2026/03/1745771343714.webp",
     featured: false,
     skills: ["NVIDIA NIM", "GPU Inference", "Docker"]
   },
   {
     id: "cert-other-3",
-    name_ar: "الدرجة الأساسية في التعلم العميق",
+    name_ar: "الدرجة التأسيسية في التعلم العميق",
     name_en: "Deep Learning Foundations Degree",
-    issuer_ar: "الشركاء الأكاديميون والتقنيون",
-    issuer_en: "Academic & Tech Partners",
+    issuer_ar: "التحالف التقني والتعليمي",
+    issuer_en: "Technical & Educational Alliance",
     date: "2026-03-09",
     credential_url: "",
-    image: "https://aurateam3.com/wp-content/uploads/2026/03/1739189774385.webp",
+    image: "https://aurateam3.com/wp-content/uploads/2026/03/1744152341517.webp",
     featured: false,
     skills: ["Deep Learning", "PyTorch", "Neural Networks"]
   },
@@ -255,7 +258,7 @@ export function CertificateCard({
                 <h3 className={`text-xs md:text-sm font-bold leading-[1.7] mb-2 ${isDark ? 'text-white' : 'text-[#15110E]'} ${isAr ? 'text-right' : 'text-left'}`}>
                   {name}
                 </h3>
-                <p className={`text-[9.5px] leading-[1.8] font-sans ${isDark ? 'text-stone-400' : 'text-stone-600'} ${isAr ? 'text-right' : 'text-left'}`}>
+                <p className={`text-[9.5px] leading-[1.8] font-sans ${isDark ? 'text-stone-455' : 'text-stone-600'} ${isAr ? 'text-right' : 'text-left'}`}>
                   {isAr ? "شهادة مهنية معتمدة تثبت الكفاءة الهندسية وتطوير الحلول البرمجية والسحابية المتطورة." : "Verified professional credential validating software engineering and cloud solutions competency."}
                 </p>
 
@@ -339,15 +342,45 @@ export function CertificateCard({
   );
 }
 
-export default function Certificates() {
+export default function CertificatesRoute() {
+  const isAmalDeploy = process.env.NEXT_PUBLIC_OWNER === 'amal';
+  if (isAmalDeploy) {
+    return <AmalCertificatesPage />;
+  }
+  return <Certificates />;
+}
+
+function Certificates() {
   const [lang, setLang] = useState<'ar'|'en'>('ar');
   const [theme, setTheme] = useState<'dark'|'light'>('dark');
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [selectedImg, setSelectedImg] = useState<string | null>(null);
 
+  useSEO('salmeen', lang, 'certificates');
+
   const [primaryCert, setPrimaryCert] = useState<CertificateProps>(fallbackPrimaryCert);
   const [otherCerts, setOtherCerts] = useState<CertificateProps[]>(fallbackOtherCerts);
+
+  const [authorized, setAuthorized] = useState(false);
+  const [passcode, setPasscode] = useState("");
+  const [passcodeError, setPasscodeError] = useState("");
+
+  useEffect(() => {
+    if (localStorage.getItem('portfolio_auth_salmeen') === 'true') {
+      setAuthorized(true);
+    }
+  }, []);
+
+  const handleVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passcode.trim() === 'salmen13') {
+      localStorage.setItem('portfolio_auth_salmeen', 'true');
+      setAuthorized(true);
+    } else {
+      setPasscodeError(isAr ? 'رمز مرور خاطئ، يرجى المحاولة مرة أخرى.' : 'Incorrect passcode, please try again.');
+    }
+  };
 
   useEffect(() => { 
     setMounted(true); 
@@ -362,7 +395,6 @@ export default function Certificates() {
     if (mounted) {
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
       document.documentElement.lang = lang;
-      document.title = lang === 'ar' ? "سالمين هادي | الشهادات" : "Salmen Hadi | Certificates";
     }
   }, [lang, mounted]);
 
@@ -372,7 +404,7 @@ export default function Certificates() {
     async function fetchCertificates() {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
       try {
-        const res = await fetch(`${apiBase}/api/certificates?owner=salmeen`);
+        const res = await fetch(`${apiBase}/api/certificates?owner=salmeen`, { cache: 'no-store' });
         if (!res.ok) {
           throw new Error(`Failed to fetch: ${res.statusText}`);
         }
@@ -429,6 +461,55 @@ export default function Certificates() {
   const primaryIssuer = isAr ? primaryCert.issuer_ar : primaryCert.issuer_en;
 
   if(!mounted) return null;
+
+  if (!authorized) {
+    return (
+      <div className={`fixed inset-0 z-[9999] flex items-center justify-center ${isDark ? 'bg-[#050505]' : 'bg-[#F9F8F6]'} overflow-hidden`} dir={isAr ? 'rtl' : 'ltr'}>
+        <ParticleNetwork />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-[#A1824A]/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
+        <div className={`flex flex-col gap-6 p-8 max-w-sm w-full mx-4 rounded-3xl border ${isDark ? 'border-white/10 bg-black/40' : 'border-stone-200 bg-white'} backdrop-blur-xl text-center shadow-2xl relative z-10`}>
+          <div className="flex justify-center">
+            <div className="w-16 h-16 bg-[#A1824A]/10 border border-[#A1824A]/30 rounded-full flex items-center justify-center text-[#A1824A] shadow-[0_0_20px_rgba(161,130,74,0.2)]">
+              <Sparkles size={28} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>
+              {isAr ? 'موقع خاص' : 'Private Site'}
+            </h2>
+            <p className={`text-xs ${isDark ? 'text-stone-400' : 'text-stone-500'} leading-relaxed`}>
+              {isAr 
+                ? 'هذا المعرض محمي برمز مرور. يرجى إدخال رمز المرور للمتابعة.' 
+                : 'This portfolio is passcode protected. Please enter the passcode to proceed.'}
+            </p>
+          </div>
+          <form onSubmit={handleVerify} className="space-y-4">
+            <div className="space-y-1">
+              <input
+                type="password"
+                value={passcode}
+                onChange={(e) => { setPasscode(e.target.value); setPasscodeError(""); }}
+                placeholder={isAr ? 'أدخل رمز المرور...' : 'Enter passcode...'}
+                className={`w-full px-5 py-3 rounded-full text-center text-sm font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white placeholder-stone-500 focus:border-[#A1824A]' : 'bg-stone-50 border-stone-200 text-stone-900 placeholder-stone-400 focus:border-[#A1824A]'} focus:outline-none transition-all`}
+                autoFocus
+              />
+              {passcodeError && (
+                <p className="text-[10px] text-red-500 font-bold mt-1">
+                  {passcodeError}
+                </p>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="w-full py-3 rounded-full bg-[#A1824A] hover:bg-yellow-600 text-black text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(161,130,74,0.3)] cursor-pointer"
+            >
+              {isAr ? 'دخول' : 'Access'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className={`min-h-[100dvh] ${isDark ? 'bg-[#050505] text-white' : 'bg-[#F9F8F6] text-[#15110E]'} selection:bg-[#A1824A] pb-32 relative overflow-hidden ${isAr ? 'font-alexandria' : 'font-sans'} transition-colors duration-700`} dir={isAr ? 'rtl' : 'ltr'}>

@@ -17,11 +17,18 @@ const contentTypes = Object.values(registry);
 const adminName = session === 'salmeen' ? 'Salmeen Hadi' : (session === 'amal' ? 'Amal Hadi' : 'Developer Admin');
 const adminRole = session === 'salmeen' ? 'Salmeen Portfolio' : (session === 'amal' ? 'Amal Portfolio' : 'Cloudflare Access');
 
+const AUTH_TOKEN = session === 'salmeen' ? 'Bearer mock_admin_token_salmeen' : 'Bearer mock_admin_token_amal';
+
 // Fetch initial media items
 let mediaItems = [];
 let fetchError = '';
 try {
-  const res = await fetch(`${API_BASE}/api/media?owner=${session}`);
+  const res = await fetch(`${API_BASE}/api/media?owner=${session}`, {
+    headers: {
+      'Authorization': AUTH_TOKEN
+    },
+    cache: 'no-store'
+  });
   if (res.ok) {
     const json = await res.json();
     mediaItems = json.data || [];
@@ -510,6 +517,7 @@ try {
         </div>
 
         <a href="/admin/media" class="nav-link active">Media Library</a>
+        <a href={session === 'salmeen' ? 'https://salmeen-hadi-6zf.pages.dev' : 'https://amal-hadi.pages.dev'} target="_blank" rel="noopener noreferrer" class="nav-link">View Live Site</a>
       </div>
 
       <div class="nav-right">
@@ -583,7 +591,7 @@ try {
 
   <div class="toast" id="toast">Copied to Clipboard!</div>
 
-  <script is:inline define:vars={{ apiBase: API_BASE, owner: session }}>
+  <script is:inline define:vars={{ apiBase: API_BASE, owner: session, authToken: session === 'salmeen' ? 'mock_admin_token_salmeen' : 'mock_admin_token_amal' }}>
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const mediaGrid = document.getElementById('media-grid');
@@ -630,7 +638,7 @@ try {
           const res = await fetch(`${apiBase}/api/media/upload`, {
             method: 'POST',
             headers: {
-              'Authorization': 'Bearer mock_admin_token'
+              'Authorization': `Bearer ${authToken}`
             },
             body: formData
           });
@@ -705,7 +713,7 @@ try {
           const res = await fetch(`${apiBase}/api/media/${encodeURIComponent(key)}?owner=${encodeURIComponent(owner)}`, {
             method: 'DELETE',
             headers: {
-              'Authorization': 'Bearer mock_admin_token'
+              'Authorization': `Bearer ${authToken}`
             }
           });
           const data = await res.json();
