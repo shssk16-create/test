@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Globe, Cpu, Workflow, Star } from "lucide-react";
+import { Sparkles, Globe, Cpu, Workflow, Star, ArrowUpRight } from "lucide-react";
 
 export function cleanCdnUrl(url: string, apiBase: string) {
   if (!url) return "";
@@ -46,6 +46,7 @@ export interface CaseStudyProps {
   isDark?: boolean;
   isAr?: boolean;
   owner?: string;
+  span?: 1 | 2 | 3;
 }
 
 const iconMap: Record<string, React.ComponentType<any>> = {
@@ -79,353 +80,333 @@ export function CaseStudyCard({
   isDark,
   isAr,
   owner = 'salmeen',
+  span = 1,
 }: CaseStudyProps) {
   const title = isAr ? title_ar : title_en;
   const subtitle = isAr ? subtitle_ar : subtitle_en;
   const problem = isAr ? problem_ar : problem_en;
-  const decision = isAr ? decision_ar : decision_en;
   const result = isAr ? result_ar : result_en;
   const IconComponent = iconMap[thumbIcon] || Sparkles;
   const backImage = image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80";
   const isAmal = owner === 'amal';
 
-  return (
-    <div className="w-full h-full [perspective:1500px] group/card cursor-pointer">
-      <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover/card:[transform:rotateY(180deg)]">
-        
-        {/* --- FRONT SIDE: Case Study Text --- */}
-        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] z-20">
-          <div
-            className={`flex flex-col h-full backdrop-blur-md rounded-3xl overflow-visible transition-all duration-500 select-none border active:scale-[0.98] ${
-              isDark 
-                ? (isAmal ? 'bg-[#2C3947]/90 border-white/5 text-[#E8EDF2] hover:border-[#C2A56D]/50 shadow-[0_8px_30px_rgba(0,0,0,0.2)]' : 'bg-[#0a0c10]/80 border-white/5 text-white hover:border-[#A1824A]/50 shadow-[0_8px_30px_rgba(0,0,0,0.2)]') 
-                : (isAmal ? 'bg-white border-[#547A95]/20 text-[#2C3947] shadow-sm hover:border-[#C2A56D]/50' : 'bg-white border-stone-200 text-[#15110E] shadow-sm hover:border-[#A1824A]/50')
-            }`}
-          >
-            {featured ? (
-              // Split-screen featured layout (2/5 branding, 3/5 vertical timeline)
-              <div className="flex flex-col md:flex-row h-full w-full overflow-visible">
-                {/* Left side: branding & info (2/5) */}
-                <div 
-                  className={`w-full md:w-2/5 flex flex-col justify-between p-6 border-b md:border-b-0 ${isAr ? 'md:border-l' : 'md:border-r'} shrink-0 relative`}
-                  style={{
-                    borderColor: isDark ? (isAmal ? 'rgba(84,122,149,0.2)' : 'rgba(255,255,255,0.05)') : (isAmal ? 'rgba(84,122,149,0.1)' : 'rgba(21,17,14,0.08)'),
-                    background: isDark 
-                      ? `radial-gradient(circle at top left, ${accentColor}15 0%, ${isAmal ? '#2C3947' : '#0a0c10'} 100%)` 
-                      : `radial-gradient(circle at top left, ${accentColor}08 0%, ${isAmal ? '#E8EDF2' : '#ffffff'} 100%)`
-                  }}
+  // Tactile Micro-animation styling
+  const cardBaseClasses = `group/card relative flex h-full rounded-[24px] overflow-hidden border transition-all duration-500 cursor-pointer select-none active:scale-[0.98] active:translate-y-[1px]`;
+  
+  const themeClasses = isDark 
+    ? (isAmal 
+        ? 'bg-[#2C3947]/90 border-white/5 text-[#E8EDF2] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_40px_rgba(194,165,109,0.12)]' 
+        : 'bg-[#0a0c10]/85 border-white/5 text-white hover:border-[#A1824A]/40 hover:shadow-[0_12px_40px_rgba(161,130,74,0.12)]') 
+    : (isAmal 
+        ? 'bg-white border-[#547A95]/20 text-[#2C3947] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_30px_rgba(194,165,109,0.08)]' 
+        : 'bg-white border-stone-200 text-[#15110E] hover:border-[#A1824A]/40 hover:shadow-[0_12px_30px_rgba(161,130,74,0.08)]');
+
+  const containerBorderColor = isDark 
+    ? (isAmal ? 'rgba(84,122,149,0.2)' : 'rgba(255,255,255,0.05)') 
+    : (isAmal ? 'rgba(84,122,149,0.1)' : 'rgba(21,17,14,0.08)');
+
+  const inlineBorderDashStyle = { borderColor: containerBorderColor };
+
+  const handleCardClick = () => {
+    if (link) {
+      window.open(link, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  // Render different layouts based on column spans
+  if (span === 3) {
+    return (
+      <div onClick={handleCardClick} className={`${cardBaseClasses} ${themeClasses} flex-col md:flex-row`}>
+        {/* Ambient glow */}
+        <div 
+          className="absolute inset-0 opacity-[0.06] dark:opacity-[0.12] pointer-events-none transition-opacity duration-500 group-hover/card:opacity-[0.16]"
+          style={{ background: `radial-gradient(circle at 20% 30%, ${accentColor} 0%, transparent 100%)` }}
+        />
+
+        {/* Content Side */}
+        <div className="w-full md:w-3/5 flex flex-col justify-between p-6 sm:p-7 relative z-10 border-b md:border-b-0 md:border-r" style={inlineBorderDashStyle}>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              {logo ? (
+                <img
+                  src={logo}
+                  alt={title}
+                  className={`h-7 md:h-8 max-w-[110px] object-contain ${
+                    isDark ? 'filter brightness-0 invert opacity-95' : (isAmal ? 'opacity-95' : 'filter brightness-0 opacity-70')
+                  }`}
+                />
+              ) : (
+                <IconComponent size={22} className={isDark ? 'text-white' : (isAmal ? 'text-[#C2A56D]' : 'text-[#8c6d32]')} />
+              )}
+              
+              {featured && (
+                <div className={`flex items-center gap-1 px-2.5 py-0.5 ${isAmal ? 'bg-[#C2A56D]' : 'bg-[#A1824A]'} text-black text-[8px] font-black rounded-full shadow-sm`}>
+                  <Star size={8} className="fill-current text-black animate-pulse" />
+                  <span>{isAr ? 'مميز' : 'FEATURED'}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-1.5" dir="ltr">
+              {category.map((cat) => (
+                <span
+                  key={cat}
+                  className={`px-2 py-0.5 text-[8px] font-black rounded-full border uppercase tracking-wider ${
+                    isDark 
+                      ? (isAmal ? 'bg-[#C2A56D]/15 text-[#C2A56D] border-[#C2A56D]/25' : 'bg-[#A1824A]/10 text-[#A1824A] border-[#A1824A]/25') 
+                      : (isAmal ? 'bg-[#C2A56D]/10 text-[#C2A56D] border-[#C2A56D]/30' : 'bg-[#A1824A]/5 text-[#8c6d32] border-[#A1824A]/30')
+                  }`}
                 >
-                  {/* Subtle background image preview for featured visual richness */}
-                  {image && (
-                    <div 
-                      className="absolute inset-0 w-full h-full bg-cover bg-center transition-all duration-700 opacity-[0.05] group-hover/card:opacity-[0.12] transition-opacity duration-700 pointer-events-none" 
-                      style={{ backgroundImage: `url('${backImage}')` }}
-                    />
-                  )}
-                  
-                  <div className="flex flex-col gap-4 relative z-10">
-                    <div className="flex justify-between items-start">
-                      {logo ? (
-                        <img
-                          src={logo}
-                          alt={title}
-                          className={`h-9 md:h-11 max-w-[130px] object-contain ${
-                            isDark ? 'filter brightness-0 invert opacity-95' : (isAmal ? 'opacity-95' : 'filter brightness-0 opacity-70')
-                          }`}
-                        />
-                      ) : (
-                        <IconComponent size={28} className={isDark ? 'text-white' : (isAmal ? 'text-[#C2A56D]' : 'text-[#8c6d32]')} />
-                      )}
-                      
-                      <div className={`flex items-center gap-1 px-2.5 py-0.5 ${isAmal ? 'bg-[#C2A56D]' : 'bg-[#A1824A]'} text-black text-[8px] font-black rounded-full border border-yellow-300/20 shadow-md`}>
-                        <Star size={8} className="fill-current text-black animate-pulse" />
-                        <span>{isAr ? 'مميز' : 'FEATURED'}</span>
-                      </div>
-                    </div>
+                  {cat}
+                </span>
+              ))}
+            </div>
 
-                    <div className="flex flex-wrap gap-1" dir="ltr">
-                      {category.map((cat) => (
-                        <span
-                          key={cat}
-                          className={`px-1.5 py-0.5 text-[7px] font-black rounded-full border uppercase tracking-wider ${
-                            isDark 
-                              ? (isAmal ? 'bg-[#C2A56D]/15 text-[#C2A56D] border-[#C2A56D]/25' : 'bg-[#A1824A]/10 text-[#A1824A] border-[#A1824A]/25') 
-                              : (isAmal ? 'bg-[#C2A56D]/10 text-[#C2A56D] border-[#C2A56D]/30' : 'bg-[#A1824A]/5 text-[#8c6d32] border-[#A1824A]/30')
-                          }`}
-                        >
-                          {cat}
-                        </span>
-                      ))}
-                    </div>
+            <div className={isAr ? 'text-right' : 'text-left'}>
+              <h3 className={`text-base md:text-xl font-black leading-[1.6] pb-[0.15em] pt-[0.1em] ${isDark ? 'text-white' : (isAmal ? 'text-[#2C3947]' : 'text-[#15110E]')}`}>
+                {title}
+              </h3>
+              <p className={`text-[10px] sm:text-xs leading-[1.7] font-sans mt-1 ${isDark ? 'text-stone-400' : 'text-stone-500'}`} dir="ltr">
+                {subtitle}
+              </p>
+            </div>
 
-                    <div className={isAr ? 'text-right' : 'text-left'}>
-                      <h3 className={`text-base md:text-lg font-bold leading-[1.7] pb-[0.15em] pt-[0.1em] ${isDark ? 'text-white' : (isAmal ? 'text-[#2C3947]' : 'text-[#15110E]')}`}>
-                        {title}
-                      </h3>
-                      <p className={`text-[10px] leading-[1.75] font-sans mt-1 ${isDark ? 'text-stone-400' : 'text-stone-600'}`} dir="ltr">
-                        {subtitle}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center pt-4 border-t border-dashed mt-6 relative z-10" style={{ borderColor: isDark ? (isAmal ? 'rgba(84,122,149,0.2)' : 'rgba(255,255,255,0.05)') : (isAmal ? 'rgba(84,122,149,0.1)' : 'rgba(21,17,14,0.08)') }}>
-                    <div className="flex flex-wrap gap-1" dir="ltr">
-                      {stack.slice(0, 4).map((item) => (
-                        <span key={item} className={`px-1.5 py-0.5 text-[8px] font-bold rounded border ${isDark ? (isAmal ? 'bg-[#1e2731] text-[#E8EDF2]/80 border-white/5' : 'bg-black/40 text-stone-400 border-white/5') : (isAmal ? 'bg-white text-[#2C3947] border-[#547A95]/30' : 'bg-stone-100 text-stone-600 border-stone-200')}`}>{item}</span>
-                      ))}
-                    </div>
-                    <span className={`text-[9px] font-bold tracking-wider ${isDark ? 'text-stone-500' : 'text-stone-400'}`} dir="ltr">{year}</span>
-                  </div>
-                </div>
-
-                {/* Right side: Problem, Decision, Result journey timeline (3/5) */}
-                <div className="w-full md:w-3/5 flex flex-col justify-between p-6 overflow-y-auto overflow-x-visible">
-                  <div className="flex flex-col gap-4 justify-center flex-grow font-sans pr-1 scrollbar-thin">
-                    <div className={`relative ${isAr ? 'pr-5 border-r' : 'pl-5 border-l'} ${isAmal ? 'border-[#547A95]/30' : 'border-stone-200/40 dark:border-white/5'} space-y-4`}>
-                      <div className="relative">
-                        <span className={`absolute ${isAr ? '-right-[29px]' : '-left-[29px]'} top-0.5 w-[16px] h-[16px] rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-[8px]`}>🔴</span>
-                        <h4 className={`text-[9.5px] font-black uppercase tracking-wider ${isDark ? 'text-rose-400' : 'text-rose-700'} ${isAr ? 'text-right' : 'text-left'}`}>
-                          {isAr ? 'التحدي والمشكلة' : 'Challenge & Problem'}
-                        </h4>
-                        <p className={`text-[10.5px] leading-[1.8] mt-1 ${isDark ? 'text-stone-300' : 'text-stone-700'} ${isAr ? 'text-right' : 'text-left'}`}>{problem}</p>
-                      </div>
-
-                      <div className="relative">
-                        <span className={`absolute ${isAr ? '-right-[29px]' : '-left-[29px]'} top-0.5 w-[16px] h-[16px] rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-[8px]`}>🟡</span>
-                        <h4 className={`text-[9.5px] font-black uppercase tracking-wider ${isDark ? 'text-amber-400' : 'text-amber-700'} ${isAr ? 'text-right' : 'text-left'}`}>
-                          {isAr ? 'القرار والحل التقني' : 'Decision & Solution'}
-                        </h4>
-                        <p className={`text-[10.5px] leading-[1.8] mt-1 ${isDark ? 'text-stone-300' : 'text-stone-700'} ${isAr ? 'text-right' : 'text-left'}`}>{decision}</p>
-                      </div>
-
-                      <div className="relative">
-                        <span className={`absolute ${isAr ? '-right-[29px]' : '-left-[29px]'} top-0.5 w-[16px] h-[16px] rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-[8px]`}>🟢</span>
-                        <h4 className={`text-[9.5px] font-black uppercase tracking-wider ${isDark ? 'text-emerald-400' : 'text-emerald-700'} ${isAr ? 'text-right' : 'text-left'}`}>
-                          {isAr ? 'الأثر والنتائج' : 'Impact & Results'}
-                        </h4>
-                        <p className={`text-[10.5px] leading-[1.8] mt-1 ${isDark ? 'text-emerald-400' : 'text-emerald-800'} font-bold ${isAr ? 'text-right' : 'text-left'}`}>{result}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-[9px] text-stone-500 dark:text-stone-400 text-center mt-4 pt-3 border-t border-dashed" style={{ borderColor: isDark ? (isAmal ? 'rgba(84,122,149,0.2)' : 'rgba(255,255,255,0.05)') : (isAmal ? 'rgba(84,122,149,0.1)' : 'rgba(21,17,14,0.08)') }}>
-                    {isAr ? '🫵 مرر الفأرة فوق البطاقة لعرض صورة المشروع الحية' : '🫵 Hover card to reveal live project screenshot'}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              // Standard vertical layout for standard items
-              <>
-                {/* 1. Card Header/Thumb */}
-                <div
-                  className="relative flex items-center justify-center h-[110px] lg:h-[135px] w-full shrink-0 overflow-hidden border-b transition-all duration-500"
-                  style={{ 
-                    background: isDark 
-                      ? `radial-gradient(circle at center, ${accentColor}25 0%, ${isAmal ? '#2C3947' : '#050505'} 100%)` 
-                      : `radial-gradient(circle at center, ${accentColor}15 0%, ${isAmal ? '#E8EDF2' : '#F9F8F6'} 100%)`,
-                    borderColor: isDark ? (isAmal ? 'rgba(84,122,149,0.2)' : 'rgba(255,255,255,0.05)') : (isAmal ? 'rgba(84,122,149,0.1)' : 'rgba(21,17,14,0.08)')
-                  }}
-                >
-                  {/* Dimmed, blurred background screenshot preview for visual variety (anti-slop rule) */}
-                  {image && (
-                    <div 
-                      className="absolute inset-0 w-full h-full bg-cover bg-center transition-all duration-700 opacity-[0.10] group-hover/card:opacity-[0.25] group-hover/card:scale-110 filter blur-[1px]" 
-                      style={{ backgroundImage: `url('${backImage}')` }}
-                    />
-                  )}
-
-                  <div className="absolute inset-0 opacity-[0.05] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:16px_16px]"></div>
-                  
-                  {logo ? (
-                    <img
-                      src={logo}
-                      alt={title}
-                      className={`h-10 lg:h-12 max-w-[200px] object-contain transition-transform duration-500 group-hover/card:scale-105 relative z-10 ${
-                        isDark ? 'filter brightness-0 invert opacity-95' : (isAmal ? 'opacity-95' : 'filter brightness-0 opacity-70')
-                      }`}
-                    />
-                  ) : (
-                    <IconComponent size={38} className={`drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] group-hover/card:scale-110 transition-transform duration-500 relative z-10 ${
-                      isDark ? 'text-white' : (isAmal ? 'text-[#C2A56D]' : 'text-[#8c6d32]')
-                    }`} />
-                  )}
-                  
-                  {featured && (
-                    <div
-                      className={`absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 ${isAmal ? 'bg-[#C2A56D]' : 'bg-[#A1824A]'} text-black text-[9px] font-black rounded-full border border-yellow-300/20 shadow-md tracking-wider z-10`}
-                      dir={isAr ? 'rtl' : 'ltr'}
-                    >
-                      <Star size={9} className="fill-current text-black animate-pulse" />
-                      <span>{isAr ? 'مميز' : 'FEATURED'}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* 2. Card Content Body */}
-                <div className="flex flex-col flex-1 p-5 overflow-visible justify-between">
-                  <div className="overflow-visible">
-                    <div className="flex flex-wrap gap-1.5 mb-2.5" dir="ltr">
-                      {category.map((cat) => (
-                        <span
-                          key={cat}
-                          className={`px-2 py-0.5 text-[8px] font-black rounded-full border uppercase tracking-wider ${
-                            isDark 
-                              ? (isAmal ? 'bg-[#C2A56D]/15 text-[#C2A56D] border-[#C2A56D]/25' : 'bg-[#A1824A]/10 text-[#A1824A] border-[#A1824A]/25') 
-                              : (isAmal ? 'bg-[#C2A56D]/10 text-[#C2A56D] border-[#C2A56D]/30' : 'bg-[#A1824A]/5 text-[#8c6d32] border-[#A1824A]/30')
-                          }`}
-                        >
-                          {cat}
-                        </span>
-                      ))}
-                    </div>
-
-                    <h3
-                      className={`text-[15px] font-bold mb-1 leading-[1.7] pb-[0.15em] pt-[0.1em] transition-colors duration-300 ${
-                        isDark ? 'text-white' : (isAmal ? 'text-[#2C3947]' : 'text-[#15110E]')
-                      } ${isAr ? 'text-right' : 'text-left'}`}
-                      dir={isAr ? 'rtl' : 'ltr'}
-                    >
-                      {title}
-                    </h3>
-
-                    <p className={`text-[10px] mb-3 leading-[1.75] font-sans ${
-                      isDark ? 'text-stone-400' : 'text-stone-600'
-                    } ${isAr ? 'text-right' : 'text-left'}`} dir="ltr">
-                      {subtitle}
-                    </p>
-
-                    <div className={`h-px w-full mb-3 ${isDark ? 'bg-white/5' : (isAmal ? 'bg-[#547A95]/20' : 'bg-stone-200')}`} />
-
-                    {/* Chronological Vertical Timeline for standard card details */}
-                    <div className={`flex flex-col gap-3 text-[11px] leading-[1.8] mb-4 overflow-y-auto overflow-x-visible font-sans pr-1 scrollbar-thin ${
-                      isDark ? 'text-stone-300' : 'text-stone-700'
-                    }`}>
-                      <div className={`relative ${isAr ? 'pr-4 border-r' : 'pl-4 border-l'} ${isAmal ? 'border-[#547A95]/30' : 'border-stone-200/40 dark:border-white/5'} space-y-3`}>
-                        <div dir={isAr ? 'rtl' : 'ltr'} className={isAr ? 'text-right' : 'text-left'}>
-                          <div className="flex items-center gap-1.5 justify-start">
-                            <span className="text-[7.5px] -mt-0.5">🔴</span>
-                            <span className={`text-[8.5px] font-black uppercase tracking-wider ${isDark ? 'text-rose-400' : 'text-rose-700'}`}>
-                              {isAr ? 'المشكلة' : 'Problem'}
-                            </span>
-                          </div>
-                          <p className={`mt-0.5 text-[10px] leading-[1.8] ${isDark ? 'text-stone-300' : 'text-stone-600'}`}>{problem}</p>
-                        </div>
-
-                        <div dir={isAr ? 'rtl' : 'ltr'} className={isAr ? 'text-right' : 'text-left'}>
-                          <div className="flex items-center gap-1.5 justify-start">
-                            <span className="text-[7.5px] -mt-0.5">🟡</span>
-                            <span className={`text-[8.5px] font-black uppercase tracking-wider ${isDark ? 'text-amber-400' : 'text-amber-700'}`}>
-                              {isAr ? 'القرار' : 'Decision'}
-                            </span>
-                          </div>
-                          <p className={`mt-0.5 text-[10px] leading-[1.8] ${isDark ? 'text-stone-300' : 'text-stone-600'}`}>{decision}</p>
-                        </div>
-
-                        <div dir={isAr ? 'rtl' : 'ltr'} className={isAr ? 'text-right' : 'text-left'}>
-                          <div className="flex items-center gap-1.5 justify-start">
-                            <span className="text-[7.5px] -mt-0.5">🟢</span>
-                            <span className={`text-[8.5px] font-black uppercase tracking-wider ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
-                              {isAr ? 'النتيجة' : 'Result'}
-                            </span>
-                          </div>
-                          <p className={`mt-0.5 text-[10px] leading-[1.8] ${isDark ? 'text-emerald-400' : 'text-emerald-800'} font-bold`}>{result}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Tech Stack Footer */}
-                  <div className={`flex justify-between items-center pt-3 border-t ${
-                    isDark ? 'border-white/5' : 'border-stone-200'
-                  }`}>
-                    <div className="flex flex-wrap gap-1" dir="ltr">
-                      {stack.slice(0, 3).map((item) => (
-                        <span
-                          key={item}
-                          className={`px-1.5 py-0.5 text-[8px] font-bold rounded border ${
-                            isDark 
-                              ? (isAmal ? 'bg-[#1e2731] text-[#E8EDF2]/80 border-white/5' : 'bg-black/40 text-stone-400 border-white/5') 
-                              : (isAmal ? 'bg-white text-[#2C3947] border-[#547A95]/30' : 'bg-stone-100 text-stone-600 border-stone-200')
-                          }`}
-                        >
-                          {item}
-                        </span>
-                      ))}
-                      {stack.length > 3 && (
-                        <span className={`px-1.5 py-0.5 text-[8px] font-bold rounded border ${isDark ? 'bg-black/20 text-stone-500 border-white/5' : 'bg-stone-50 text-stone-400 border-stone-100'}`}>+{stack.length - 3}</span>
-                      )}
-                    </div>
-                    <span className={`text-[9px] font-bold tracking-wider ${isDark ? 'text-stone-500' : 'text-stone-400'}`} dir="ltr">
-                      {year}
+            {/* Structured visual journey list instead of emojis */}
+            <div className="relative pt-3 border-t" style={inlineBorderDashStyle}>
+              <div className={`relative ${isAr ? 'pr-4 border-r' : 'pl-4 border-l'} ${isAmal ? 'border-[#547A95]/30' : 'border-stone-200/40 dark:border-white/5'} space-y-3`}>
+                <div dir={isAr ? 'rtl' : 'ltr'} className={isAr ? 'text-right' : 'text-left'}>
+                  <div className="flex items-center gap-1.5 justify-start">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                    <span className={`text-[8.5px] font-black uppercase tracking-wider ${isDark ? 'text-rose-400' : 'text-rose-700'}`}>
+                      {isAr ? 'المشكلة والتحدي' : 'Problem'}
                     </span>
                   </div>
+                  <p className={`mt-0.5 text-[10px] sm:text-[11px] leading-[1.7] ${isDark ? 'text-stone-300' : 'text-stone-600'}`}>{problem}</p>
                 </div>
-              </>
-            )}
+
+                <div dir={isAr ? 'rtl' : 'ltr'} className={isAr ? 'text-right' : 'text-left'}>
+                  <div className="flex items-center gap-1.5 justify-start">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span className={`text-[8.5px] font-black uppercase tracking-wider ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                      {isAr ? 'النتيجة والأثر' : 'Result & Impact'}
+                    </span>
+                  </div>
+                  <p className={`mt-0.5 text-[10px] sm:text-[11px] leading-[1.7] ${isDark ? 'text-emerald-400' : 'text-emerald-800'} font-bold`}>{result}</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* --- BACK SIDE: Project Screenshot Flip --- */}
-        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] z-10">
-          <div
-            className={`flex flex-col h-full rounded-3xl overflow-visible border relative justify-end p-6 transition-all duration-500 active:scale-[0.98] ${
-              isDark ? 'border-white/5 shadow-2xl' : 'border-stone-200 shadow-xl'
-            }`}
-            style={{
-              backgroundImage: `url('${backImage}')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          >
-            {/* Premium gradient overlay */}
-            <div className={`absolute inset-0 bg-gradient-to-b ${isAmal ? 'from-[#C2A56D]/25' : 'from-[#A1824A]/25'} via-black/70 to-black/95 z-0`}></div>
-
-            <div className="relative z-10 flex flex-col gap-4">
-              <div className="flex justify-between items-start">
-                <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/15">
-                  {logo ? (
-                    <img src={logo} alt="client logo" className="max-h-[60%] max-w-[80%] object-contain filter brightness-0 invert" />
-                  ) : (
-                    <IconComponent size={16} className="text-white" />
-                  )}
-                </div>
-                {featured && (
-                  <span className={`px-2.5 py-0.5 ${isAmal ? 'bg-[#C2A56D]' : 'bg-[#A1824A]'} text-black text-[8px] font-black rounded-full border border-yellow-300/20 shadow-md`}>
-                    {isAr ? 'مشروع مميز' : 'FEATURED WORK'}
-                  </span>
-                )}
-              </div>
-
-              <div>
-                <h3 className="text-white font-black text-lg leading-[1.7] pb-[0.15em]">
-                  {title}
-                </h3>
-                <p className="text-stone-300 text-xs font-sans mt-1" dir="ltr">
-                  {subtitle}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                <span className="text-stone-400 text-[10px] font-black uppercase tracking-wider">{isAr ? 'تصفح المشروع' : 'EXPLORE'}</span>
-                {link ? (
-                  <a
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex items-center gap-1.5 px-4 py-2 ${isAmal ? 'bg-[#C2A56D] hover:bg-[#b39158] shadow-[0_0_15px_rgba(194,165,109,0.3)]' : 'bg-[#A1824A] hover:bg-yellow-600 shadow-[0_0_15px_rgba(161,130,74,0.3)]'} text-black text-[10px] font-black rounded-full hover:scale-105 active:scale-95 transition-all`}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <span>{isAr ? 'زيارة الموقع' : 'Visit Site'}</span>
-                    <Globe size={11} />
-                  </a>
-                ) : (
-                  <span className="text-white/40 text-[9px] font-bold italic">{isAr ? 'منصة داخلية مغلقة' : 'Internal platform'}</span>
-                )}
-              </div>
+          <div className="flex justify-between items-center pt-4 border-t border-dashed mt-6" style={inlineBorderDashStyle}>
+            <div className="flex flex-wrap gap-1" dir="ltr">
+              {stack.map((item) => (
+                <span key={item} className={`px-1.5 py-0.5 text-[8px] font-bold rounded border ${isDark ? (isAmal ? 'bg-[#1e2731] text-[#E8EDF2]/80 border-white/5' : 'bg-black/40 text-stone-400 border-white/5') : (isAmal ? 'bg-white text-[#2C3947] border-[#547A95]/30' : 'bg-stone-100 text-stone-600 border-stone-200')}`}>{item}</span>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`text-[9px] font-bold tracking-wider ${isDark ? 'text-stone-500' : 'text-stone-400'}`} dir="ltr">{year}</span>
+              {link && <ArrowUpRight size={14} className={`opacity-50 group-hover/card:opacity-100 group-hover/card:translate-x-0.5 group-hover/card:-translate-y-0.5 transition-all ${isAmal ? 'text-[#C2A56D]' : 'text-[#A1824A]'}`} />}
             </div>
           </div>
         </div>
 
+        {/* Visual Mockup Side */}
+        <div 
+          className="w-full md:w-2/5 h-[220px] md:h-auto overflow-hidden relative flex items-center justify-center p-6 transition-colors duration-500"
+          style={{
+            background: isDark 
+              ? `radial-gradient(circle at center, ${accentColor}25 0%, ${isAmal ? '#2C3947' : '#0a0c10'} 100%)` 
+              : `radial-gradient(circle at center, ${accentColor}10 0%, ${isAmal ? '#E8EDF2' : '#ffffff'} 100%)`
+          }}
+        >
+          {image ? (
+            <div className="relative w-full h-full min-h-[160px] rounded-2xl overflow-hidden border border-white/10 shadow-xl transition-all duration-500 group-hover/card:scale-[1.03] group-hover/card:shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
+              <img src={backImage} alt={title} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <IconComponent size={36} className={isDark ? 'text-white/30' : (isAmal ? 'text-[#C2A56D]' : 'text-[#8c6d32]')} />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (span === 2) {
+    return (
+      <div onClick={handleCardClick} className={`${cardBaseClasses} ${themeClasses} flex-col md:flex-row`}>
+        {/* Ambient glow */}
+        <div 
+          className="absolute inset-0 opacity-[0.06] dark:opacity-[0.12] pointer-events-none transition-opacity duration-500 group-hover/card:opacity-[0.16]"
+          style={{ background: `radial-gradient(circle at 20% 30%, ${accentColor} 0%, transparent 100%)` }}
+        />
+
+        {/* Content Side */}
+        <div className="w-full md:w-3/5 flex flex-col justify-between p-6 relative z-10 border-b md:border-b-0 md:border-r" style={inlineBorderDashStyle}>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              {logo ? (
+                <img
+                  src={logo}
+                  alt={title}
+                  className={`h-7 max-w-[100px] object-contain ${
+                    isDark ? 'filter brightness-0 invert opacity-95' : (isAmal ? 'opacity-95' : 'filter brightness-0 opacity-70')
+                  }`}
+                />
+              ) : (
+                <IconComponent size={20} className={isDark ? 'text-white' : (isAmal ? 'text-[#C2A56D]' : 'text-[#8c6d32]')} />
+              )}
+              
+              {featured && (
+                <div className={`flex items-center gap-1 px-2 py-0.5 ${isAmal ? 'bg-[#C2A56D]' : 'bg-[#A1824A]'} text-black text-[8px] font-black rounded-full shadow-sm`}>
+                  <Star size={8} className="fill-current text-black animate-pulse" />
+                  <span>{isAr ? 'مميز' : 'FEATURED'}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-1" dir="ltr">
+              {category.map((cat) => (
+                <span
+                  key={cat}
+                  className={`px-1.5 py-0.5 text-[7px] font-black rounded-full border uppercase tracking-wider ${
+                    isDark 
+                      ? (isAmal ? 'bg-[#C2A56D]/15 text-[#C2A56D] border-[#C2A56D]/25' : 'bg-[#A1824A]/10 text-[#A1824A] border-[#A1824A]/25') 
+                      : (isAmal ? 'bg-[#C2A56D]/10 text-[#C2A56D] border-[#C2A56D]/30' : 'bg-[#A1824A]/5 text-[#8c6d32] border-[#A1824A]/30')
+                  }`}
+                >
+                  {cat}
+                </span>
+              ))}
+            </div>
+
+            <div className={isAr ? 'text-right' : 'text-left'}>
+              <h3 className={`text-base md:text-[17px] font-bold leading-[1.6] pb-[0.15em] pt-[0.1em] ${isDark ? 'text-white' : (isAmal ? 'text-[#2C3947]' : 'text-[#15110E]')}`}>
+                {title}
+              </h3>
+              <p className={`text-[10px] leading-[1.6] font-sans mt-1 ${isDark ? 'text-stone-400' : 'text-stone-500'}`} dir="ltr">
+                {subtitle}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center pt-4 border-t border-dashed mt-6" style={inlineBorderDashStyle}>
+            <div className="flex flex-wrap gap-1" dir="ltr">
+              {stack.slice(0, 3).map((item) => (
+                <span key={item} className={`px-1.5 py-0.5 text-[8px] font-bold rounded border ${isDark ? (isAmal ? 'bg-[#1e2731] text-[#E8EDF2]/80 border-white/5' : 'bg-black/40 text-stone-400 border-white/5') : (isAmal ? 'bg-white text-[#2C3947] border-[#547A95]/30' : 'bg-stone-100 text-stone-600 border-stone-200')}`}>{item}</span>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`text-[9px] font-bold tracking-wider ${isDark ? 'text-stone-500' : 'text-stone-400'}`} dir="ltr">{year}</span>
+              {link && <ArrowUpRight size={14} className={`opacity-50 group-hover/card:opacity-100 group-hover/card:translate-x-0.5 group-hover/card:-translate-y-0.5 transition-all ${isAmal ? 'text-[#C2A56D]' : 'text-[#A1824A]'}`} />}
+            </div>
+          </div>
+        </div>
+
+        {/* Visual Mockup Side */}
+        <div 
+          className="w-full md:w-2/5 h-[180px] md:h-auto overflow-hidden relative flex items-center justify-center p-5 transition-colors duration-500"
+          style={{
+            background: isDark 
+              ? `radial-gradient(circle at center, ${accentColor}25 0%, ${isAmal ? '#2C3947' : '#0a0c10'} 100%)` 
+              : `radial-gradient(circle at center, ${accentColor}10 0%, ${isAmal ? '#E8EDF2' : '#ffffff'} 100%)`
+          }}
+        >
+          {image ? (
+            <div className="relative w-full h-full min-h-[140px] rounded-xl overflow-hidden border border-white/10 shadow-lg transition-all duration-500 group-hover/card:scale-[1.03] group-hover/card:translate-y-[-1px]">
+              <img src={backImage} alt={title} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <IconComponent size={30} className={isDark ? 'text-white/30' : (isAmal ? 'text-[#C2A56D]' : 'text-[#8c6d32]')} />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // span === 1
+  return (
+    <div onClick={handleCardClick} className={`${cardBaseClasses} ${themeClasses} flex-col`}>
+      {/* Ambient glow */}
+      <div 
+        className="absolute inset-0 opacity-[0.06] dark:opacity-[0.12] pointer-events-none transition-opacity duration-500 group-hover/card:opacity-[0.16]"
+        style={{ background: `radial-gradient(circle at center, ${accentColor} 0%, transparent 100%)` }}
+      />
+
+      {/* Top Graphic Header */}
+      <div 
+        className="relative h-[150px] sm:h-[160px] w-full shrink-0 overflow-hidden border-b transition-colors duration-500 flex items-center justify-center"
+        style={{
+          borderColor: containerBorderColor,
+          background: isDark 
+            ? `radial-gradient(circle at center, ${accentColor}20 0%, ${isAmal ? '#2C3947' : '#050505'} 100%)` 
+            : `radial-gradient(circle at center, ${accentColor}08 0%, ${isAmal ? '#E8EDF2' : '#F9F8F6'} 100%)`
+        }}
+      >
+        {image ? (
+          <img 
+            src={backImage} 
+            alt={title} 
+            className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105" 
+          />
+        ) : (
+          <IconComponent size={30} className={isDark ? 'text-white/40' : (isAmal ? 'text-[#C2A56D]' : 'text-[#8c6d32]')} />
+        )}
+
+        {logo && (
+          <div className="absolute top-4 left-4 z-10 w-7 h-7 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center">
+            <img src={logo} alt="logo" className="h-[60%] max-w-[80%] object-contain filter brightness-0 invert" />
+          </div>
+        )}
+
+        {featured && (
+          <div className={`absolute top-4 right-4 flex items-center gap-1.5 px-2 py-0.5 ${isAmal ? 'bg-[#C2A56D]' : 'bg-[#A1824A]'} text-black text-[8px] font-black rounded-full shadow-md z-10`}>
+            <Star size={8} className="fill-current text-black animate-pulse" />
+            <span>{isAr ? 'مميز' : 'FEATURED'}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Content Body */}
+      <div className="flex flex-col flex-1 p-5 justify-between relative z-10">
+        <div>
+          <div className="flex flex-wrap gap-1 mb-2.5" dir="ltr">
+            {category.map((cat) => (
+              <span
+                key={cat}
+                className={`px-1.5 py-0.5 text-[7px] font-black rounded-full border uppercase tracking-wider ${
+                  isDark 
+                    ? (isAmal ? 'bg-[#C2A56D]/15 text-[#C2A56D] border-[#C2A56D]/25' : 'bg-[#A1824A]/10 text-[#A1824A] border-[#A1824A]/25') 
+                    : (isAmal ? 'bg-[#C2A56D]/10 text-[#C2A56D] border-[#C2A56D]/30' : 'bg-[#A1824A]/5 text-[#8c6d32] border-[#A1824A]/30')
+                }`}
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
+
+          <h3 className={`text-[14px] sm:text-[15px] font-bold leading-[1.6] pb-[0.15em] pt-[0.1em] ${isDark ? 'text-white' : (isAmal ? 'text-[#2C3947]' : 'text-[#15110E]')} ${isAr ? 'text-right' : 'text-left'}`}>
+            {title}
+          </h3>
+
+          <p className={`text-[10px] leading-[1.6] font-sans text-left ${isDark ? 'text-stone-400' : 'text-stone-600'} ${isAr ? 'text-right' : 'text-left'}`} dir="ltr">
+            {subtitle}
+          </p>
+        </div>
+
+        <div className="flex justify-between items-center pt-3 border-t border-dashed mt-4" style={inlineBorderDashStyle}>
+          <div className="flex flex-wrap gap-1" dir="ltr">
+            {stack.slice(0, 2).map((item) => (
+              <span key={item} className={`px-1.5 py-0.5 text-[8px] font-bold rounded border ${isDark ? (isAmal ? 'bg-[#1e2731] text-[#E8EDF2]/80 border-white/5' : 'bg-black/40 text-stone-400 border-white/5') : (isAmal ? 'bg-white text-[#2C3947] border-[#547A95]/30' : 'bg-stone-100 text-stone-600 border-stone-200')}`}>{item}</span>
+            ))}
+            {stack.length > 2 && (
+              <span className={`px-1.5 py-0.5 text-[8px] font-bold rounded border ${isDark ? 'bg-black/20 text-stone-500 border-white/5' : 'bg-stone-50 text-stone-400 border-stone-100'}`}>+{stack.length - 2}</span>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className={`text-[9px] font-bold tracking-wider ${isDark ? 'text-stone-500' : 'text-stone-400'}`} dir="ltr">{year}</span>
+            {link && <ArrowUpRight size={12} className={`opacity-50 group-hover/card:opacity-100 group-hover/card:translate-x-0.5 group-hover/card:-translate-y-0.5 transition-all ${isAmal ? 'text-[#C2A56D]' : 'text-[#A1824A]'}`} />}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -623,25 +604,49 @@ export function WorksSection({ owner = 'salmeen' }: { owner?: string }) {
   const isAr = lang === 'ar';
   const isAmal = owner === 'amal';
 
-  const getBentoClasses = (idx: number, total: number) => {
-    if (total === 1) {
-      return "col-span-1 min-h-[380px] md:min-h-[420px]";
-    }
-    if (total === 2) {
-      return "col-span-1 min-h-[380px] md:min-h-[420px]";
-    }
-    if (total === 3) {
-      if (idx === 0) return "md:col-span-2 min-h-[380px] md:min-h-[420px]";
-      if (idx === 1) return "md:col-span-1 min-h-[380px] md:min-h-[420px]";
-      return "md:col-span-3 min-h-[280px] md:min-h-[320px]";
-    }
-    if (idx === 0) return "md:col-span-2 md:row-span-1 min-h-[380px] md:min-h-[420px]";
-    if (idx === 1) return "md:col-span-1 md:row-span-1 min-h-[380px] md:min-h-[420px]";
-    if (idx === 2) return "md:col-span-1 md:row-span-1 min-h-[380px] md:min-h-[420px]";
-    if (idx === 3) return "md:col-span-2 md:row-span-1 min-h-[380px] md:min-h-[420px]";
+  const getBentoSpan = (idx: number, total: number): 1 | 2 | 3 => {
+    if (total === 1) return 3;
+    if (total === 2) return 1; // Since container is md:grid-cols-2, each gets 1 col
     
-    const posInRow = idx % 4;
-    if (posInRow === 0 || posInRow === 3) return "md:col-span-2 min-h-[380px] md:min-h-[420px]";
+    if (total === 3) {
+      if (idx === 0) return 2;
+      if (idx === 1) return 1;
+      return 3;
+    }
+    if (total === 4) {
+      if (idx === 0 || idx === 3) return 2;
+      return 1;
+    }
+    
+    const spans: number[] = [];
+    let currentSum = 0;
+    for (let i = 0; i < total; i++) {
+      const s = (i % 3 === 0) ? 2 : 1;
+      spans.push(s);
+      currentSum += s;
+    }
+    const remainder = currentSum % 3;
+    if (remainder === 1) {
+      for (let i = total - 1; i >= 0; i--) {
+        if (spans[i] === 2) {
+          spans[i] = 1;
+          break;
+        }
+      }
+    } else if (remainder === 2) {
+      for (let i = total - 1; i >= 0; i--) {
+        if (spans[i] === 1) {
+          spans[i] = 2;
+          break;
+        }
+      }
+    }
+    return (spans[idx] as 1 | 2 | 3) || 1;
+  };
+
+  const getBentoClasses = (span: 1 | 2 | 3) => {
+    if (span === 3) return "md:col-span-3 min-h-[340px] md:min-h-[380px]";
+    if (span === 2) return "md:col-span-2 min-h-[380px] md:min-h-[420px]";
     return "md:col-span-1 min-h-[380px] md:min-h-[420px]";
   };
 
@@ -656,7 +661,6 @@ export function WorksSection({ owner = 'salmeen' }: { owner?: string }) {
           : (isAmal ? 'bg-[#E8EDF2] text-[#2C3947]' : 'bg-[#F9F8F6] text-[#15110E]')
       } ${isAr ? 'font-alexandria' : 'font-sans'}`}
     >
-
       {/* Dynamic ambient gold glows */}
       <div className={`absolute top-0 left-1/4 w-[300px] md:w-[600px] h-[300px] md:h-[500px] ${isAmal ? 'bg-[#C2A56D]/10' : 'bg-[#A1824A]/10'} blur-[120px] rounded-full pointer-events-none -z-10`} />
       <div className={`absolute bottom-10 right-1/4 w-[300px] md:w-[600px] h-[300px] md:h-[500px] ${isAmal ? 'bg-[#C2A56D]/10' : 'bg-[#A1824A]/10'} blur-[120px] rounded-full pointer-events-none -z-10`} />
@@ -678,15 +682,15 @@ export function WorksSection({ owner = 'salmeen' }: { owner?: string }) {
           </h1>
         </div>
 
-        {/* Filter Navigation */}
+        {/* Filter Navigation Buttons */}
         <div className="flex flex-wrap gap-2.5 justify-center" dir={isAr ? 'rtl' : 'ltr'}>
           {filterOptions.map((option) => (
             <button
               key={option}
               onClick={() => setActiveFilter(option)}
-              className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] font-black transition-all duration-300 active:scale-95 border ${
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] font-black transition-all duration-300 active:scale-95 active:translate-y-[1px] border cursor-pointer ${
                 activeFilter === option
-                  ? (isAmal ? "bg-[#C2A56D] text-black border-[#C2A56D] shadow-[0_4px_20px_rgba(194,165,109,0.3)] scale-105" : "bg-[#A1824A] text-black border-[#A1824A] shadow-[0_4px_20px_rgba(161,130,74,0.3)] scale-105")
+                  ? (isAmal ? "bg-[#C2A56D] text-black border-[#C2A56D] shadow-[0_4px_20px_rgba(194,165,109,0.3)]" : "bg-[#A1824A] text-black border-[#A1824A] shadow-[0_4px_20px_rgba(161,130,74,0.3)]")
                   : (isDark 
                       ? "bg-white/5 text-zinc-400 border-white/10 hover:border-white/20 hover:text-white"
                       : (isAmal ? "bg-white text-[#2C3947]/70 border-stone-200 hover:border-[#C2A56D] hover:text-[#2C3947]" : "bg-white text-stone-500 border-stone-200 hover:border-[#A1824A] hover:text-[#15110E]"))
@@ -709,19 +713,22 @@ export function WorksSection({ owner = 'salmeen' }: { owner?: string }) {
           }`}
         >
           <AnimatePresence mode="popLayout">
-            {filteredCards.map((card, index) => (
-              <motion.div
-                key={card.title_en}
-                layout
-                initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className={getBentoClasses(index, filteredCards.length)}
-              >
-                <CaseStudyCard {...card} isDark={isDark} isAr={isAr} owner={owner} />
-              </motion.div>
-            ))}
+            {filteredCards.map((card, index) => {
+              const span = getBentoSpan(index, filteredCards.length);
+              return (
+                <motion.div
+                  key={card.title_en}
+                  layout
+                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className={getBentoClasses(span)}
+                >
+                  <CaseStudyCard {...card} isDark={isDark} isAr={isAr} owner={owner} span={span} />
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </motion.div>
       </div>

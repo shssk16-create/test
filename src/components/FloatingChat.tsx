@@ -194,7 +194,7 @@ export default function FloatingChat({ owner = 'salmeen' }: { owner?: string }) 
               
               {msg.length === 1 && !load && (
                 <div className={`flex flex-wrap gap-2 mt-2 self-start ${isAr ? 'mr-10' : 'ml-10'}`}>
-                  {t[lang].suggs.map((s, i) => (<button key={i} onClick={() => send(s)} className={`${isDark ? (isAmal ? 'bg-[#25303c] border-[#547A95]/30 text-[#E8EDF2]/80' : 'bg-[#111318] border-[#1e2330] text-[#9aa3b2]') : (isAmal ? 'bg-white border-[#547A95]/30 text-[#2C3947]/80' : 'bg-white border-stone-200 text-stone-600')} border hover:border-${isAmal ? '[#C2A56D] hover:text-[#C2A56D]' : '[#A1824A] hover:text-[#A1824A]'} px-4 py-2 rounded-full text-[11px] font-bold transition-all hover:scale-105 shadow-sm`}>{s}</button>))}
+                  {t[lang].suggs.map((s, i) => (<button key={i} onClick={() => send(s)} className={`${isDark ? (isAmal ? 'bg-[#25303c] border-[#547A95]/30 text-[#E8EDF2]/80' : 'bg-[#111318] border-[#1e2330] text-[#9aa3b2]') : (isAmal ? 'bg-white border-[#547A95]/30 text-[#2C3947]/80' : 'bg-white border-stone-200 text-stone-600')} border ${isAmal ? 'hover:border-[#C2A56D] hover:text-[#C2A56D]' : 'hover:border-[#A1824A] hover:text-[#A1824A]'} px-4 py-2 rounded-full text-[11px] font-bold transition-all hover:scale-105 shadow-sm`}>{s}</button>))}
                 </div>
               )}
 
@@ -203,7 +203,7 @@ export default function FloatingChat({ owner = 'salmeen' }: { owner?: string }) 
             </div>
             
             <div className={`p-3 ${isDark ? (isAmal ? 'bg-[#25303c] border-[#547A95]/20' : 'bg-[#111318] border-[#1e2330]') : (isAmal ? 'bg-[#E8EDF2]/50 border-[#547A95]/20' : 'bg-white border-stone-200')} border-t flex gap-2 items-center`}>
-              <input type="text" value={inp} onChange={e => setInp(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder={t[lang].placeholder} className={`flex-1 ${isDark ? (isAmal ? 'bg-[#1e2731] border-[#547A95]/25 text-[#E8EDF2]' : 'bg-[#181c24] border-[#1e2330] text-[#e8ecf0]') : (isAmal ? 'bg-white border-[#547A95]/20 text-[#2C3947]' : 'bg-stone-50 border-stone-200 text-[#15110E]')} border focus:border-${isAmal ? '[#C2A56D]' : '[#A1824A]'} transition-colors rounded-xl px-4 py-3 text-[13px] leading-[1.8] outline-none placeholder:text-[#4a5568]`} />
+              <input type="text" value={inp} onChange={e => setInp(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder={t[lang].placeholder} className={`flex-1 ${isDark ? (isAmal ? 'bg-[#1e2731] border-[#547A95]/25 text-[#E8EDF2]' : 'bg-[#181c24] border-[#1e2330] text-[#e8ecf0]') : (isAmal ? 'bg-white border-[#547A95]/20 text-[#2C3947]' : 'bg-stone-50 border-stone-200 text-[#15110E]')} border ${isAmal ? 'focus:border-[#C2A56D]' : 'focus:border-[#A1824A]'} transition-colors rounded-xl px-4 py-3 text-[13px] leading-[1.8] outline-none placeholder:text-[#4a5568]`} />
               <button onClick={() => send()} className={`w-12 h-12 bg-gradient-to-br ${isAmal ? 'from-[#C2A56D] to-[#b39158]' : 'from-[#A1824A] to-yellow-600'} text-black rounded-xl flex items-center justify-center hover:scale-105 transition-transform`}><Send size={18} className={`${isAr ? 'rtl:-translate-x-0.5 rtl:translate-y-0.5 rtl:rotate-180' : 'translate-x-0.5 translate-y-0.5'}`}/></button>
             </div>
           </motion.div>
@@ -212,7 +212,7 @@ export default function FloatingChat({ owner = 'salmeen' }: { owner?: string }) 
 
       <div className="relative group">
         {!isOpen && (<div className={`absolute -inset-1.5 bg-gradient-to-r ${isAmal ? 'from-[#C2A56D] to-[#b39158]' : 'from-[#A1824A] to-yellow-500'} rounded-full blur-md opacity-40 animate-pulse group-hover:opacity-80 transition duration-500`}></div>)}
-        <button onClick={() => setIsOpen(!isOpen)} className={`relative h-12 sm:h-14 bg-gradient-to-br ${isAmal ? 'from-[#C2A56D] to-[#b39158]' : 'from-[#A1824A] to-yellow-500'} text-black rounded-full flex items-center justify-center shadow-[0_0_30px_${isAmal ? 'rgba(194,165,109,0.5)' : 'rgba(161,130,74,0.5)'}] hover:scale-110 active:scale-95 transition-all duration-300 border ${isAmal ? 'border-yellow-200/50' : 'border-yellow-300/50'} ${isOpen ? 'w-12 sm:w-14 px-0' : 'px-4 sm:px-6 md:px-8 gap-2 sm:gap-3 w-auto'}`}>
+        <button onClick={() => setIsOpen(!isOpen)} className={`relative h-12 sm:h-14 bg-gradient-to-br ${isAmal ? 'from-[#C2A56D] to-[#b39158]' : 'from-[#A1824A] to-yellow-500'} text-black rounded-full flex items-center justify-center ${isAmal ? 'shadow-[0_0_30px_rgba(194,165,109,0.5)]' : 'shadow-[0_0_30px_rgba(161,130,74,0.5)]'} hover:scale-110 active:scale-95 transition-all duration-300 border ${isAmal ? 'border-yellow-200/50' : 'border-yellow-300/50'} ${isOpen ? 'w-12 sm:w-14 px-0' : 'px-4 sm:px-6 md:px-8 gap-2 sm:gap-3 w-auto'}`}>
           {!isOpen && (
             <span className={`absolute -top-1 ${isAr ? '-left-1' : '-right-1'} flex h-4 w-4`}>
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
