@@ -15,7 +15,7 @@ export function LoadingScreen() {
         animate={{ opacity: 1, scale: 1 }}
         className="text-center"
       >
-        <h2 className="text-5xl md:text-7xl font-heading font-black text-sand-100 mb-4">أهلاً وسهلاً</h2>
+        <h2 className="text-5xl md:text-7xl font-heading font-black text-sand-100 pb-[0.15em] pt-[0.1em] mb-4">أهلاً وسهلاً</h2>
         <p className="text-bronze tracking-[0.5em] text-sm font-bold uppercase">Welcome</p>
       </motion.div>
       <motion.div 

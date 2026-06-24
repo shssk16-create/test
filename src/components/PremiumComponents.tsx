@@ -28,7 +28,7 @@ export function DigitalIDCard() {
           <div className="text-end font-heading font-black text-xl">SALMEEN<span className="text-rose-700">.</span></div>
         </div>
         <div>
-          <h2 className="text-2xl font-heading font-black text-stone-900 mb-1">سالمين هادي</h2>
+          <h2 className="text-2xl font-heading font-black text-stone-900 pb-[0.15em] mb-1">سالمين هادي</h2>
           <p className="text-xs text-stone-500 font-bold uppercase tracking-widest">AI PM & Full-Stack Developer</p>
         </div>
         <div className="pt-4 border-t border-stone-200/50 flex justify-between items-center text-[10px] font-bold text-stone-400 uppercase tracking-tighter">
@@ -67,7 +67,7 @@ export function RagChatbot() {
       <div className="p-4 bg-stone-50 border-b border-stone-100 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-stone-900 text-stone-50 flex items-center justify-center"><Bot size={20} /></div>
-          <div className="text-start leading-tight"><h4 className="font-bold text-sm">Salmeen Assistant</h4><span className="text-[10px] text-green-600 font-bold">متصل الآن</span></div>
+          <div className="text-start leading-[1.7]"><h4 className="font-bold text-sm">Salmeen Assistant</h4><span className="text-[10px] text-green-600 font-bold">متصل الآن</span></div>
         </div>
       </div>
       <div className="flex-1 p-6 overflow-y-auto flex flex-col gap-4 text-start">

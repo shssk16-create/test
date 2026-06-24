@@ -121,7 +121,7 @@ export function CertificateCard({
                   }`}>{issuer}</span>
                   <span className={`text-[8px] font-bold ${isDark ? 'text-stone-500' : 'text-stone-400'}`} dir="ltr">{date}</span>
                 </div>
-                <h3 className={`text-xs md:text-sm font-bold leading-[1.7] mb-2 ${isDark ? 'text-white' : 'text-[#2C3947]'} ${isAr ? 'text-right' : 'text-left'}`}>
+                <h3 className={`text-xs md:text-sm font-bold leading-[1.7] pb-[0.15em] mb-2 ${isDark ? 'text-white' : 'text-[#2C3947]'} ${isAr ? 'text-right' : 'text-left'}`}>
                   {name}
                 </h3>
                 <p className={`text-[9.5px] leading-[1.8] font-sans ${isDark ? 'text-stone-400' : 'text-stone-600'} ${isAr ? 'text-right' : 'text-left'}`}>
@@ -185,7 +185,7 @@ export function CertificateCard({
                 )}
               </div>
               
-              <h4 className="text-white font-black text-xs leading-[1.7] max-w-full truncate">{name}</h4>
+              <h4 className="text-white font-black text-xs leading-[1.7] max-w-full truncate pb-[0.1em]">{name}</h4>
               
               <div className="flex items-center justify-between pt-2 border-t border-white/10">
                 {credential_url ? (
@@ -336,7 +336,7 @@ export default function AmalCertificates() {
             </div>
           </div>
           <div className="space-y-2">
-            <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>
+            <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'} pb-[0.15em]`}>
               {isAr ? 'موقع خاص' : 'Private Site'}
             </h2>
             <p className={`text-xs ${isDark ? 'text-stone-300' : 'text-stone-600'} leading-relaxed`}>
@@ -476,7 +476,7 @@ export default function AmalCertificates() {
                     {/* Right Split */}
                     <div className="w-full md:w-3/5 flex flex-col justify-between p-6 overflow-y-auto overflow-x-visible">
                       <div className="flex flex-col gap-3 font-sans pr-1 scrollbar-thin">
-                        <h3 className={`text-base md:text-lg font-black leading-[1.7] ${isDark ? 'text-white' : 'text-[#2C3947]'} ${isAr ? 'text-right' : 'text-left'}`}>
+                        <h3 className={`text-base md:text-lg font-black leading-[1.7] pb-[0.15em] ${isDark ? 'text-white' : 'text-[#2C3947]'} ${isAr ? 'text-right' : 'text-left'}`}>
                           {primaryName}
                         </h3>
                         <p className={`text-[10.5px] leading-[1.8] ${isDark ? 'text-stone-300' : 'text-stone-700'} ${isAr ? 'text-right' : 'text-left'}`}>
@@ -543,7 +543,7 @@ export default function AmalCertificates() {
                         </span>
                       </div>
                       
-                      <h4 className="text-white font-black text-sm md:text-base leading-[1.7]">{primaryName}</h4>
+                      <h4 className="text-white font-black text-sm md:text-base leading-[1.7] pb-[0.15em]">{primaryName}</h4>
                       
                       <div className="flex items-center justify-between pt-3 border-t border-white/10">
                         <span className="text-stone-400 text-[10px] font-black uppercase tracking-wider">{primaryCert.date}</span>

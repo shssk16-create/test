@@ -76,7 +76,7 @@ export default function AmalPortfolioPage() {
             </div>
           </div>
           <div className="space-y-2">
-            <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'}`}>
+            <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-stone-900'} pb-[0.15em]`}>
               {isAr ? 'موقع خاص' : 'Private Site'}
             </h2>
             <p className={`text-xs ${isDark ? 'text-stone-300' : 'text-stone-600'} leading-relaxed`}>

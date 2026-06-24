@@ -159,7 +159,7 @@ export function CaseStudyCard({
                     </div>
 
                     <div className={isAr ? 'text-right' : 'text-left'}>
-                      <h3 className={`text-base md:text-lg font-bold leading-[1.7] pb-[0.1em] pt-[0.1em] ${isDark ? 'text-white' : (isAmal ? 'text-[#2C3947]' : 'text-[#15110E]')}`}>
+                      <h3 className={`text-base md:text-lg font-bold leading-[1.7] pb-[0.15em] pt-[0.1em] ${isDark ? 'text-white' : (isAmal ? 'text-[#2C3947]' : 'text-[#15110E]')}`}>
                         {title}
                       </h3>
                       <p className={`text-[10px] leading-[1.75] font-sans mt-1 ${isDark ? 'text-stone-400' : 'text-stone-600'}`} dir="ltr">
@@ -280,7 +280,7 @@ export function CaseStudyCard({
                     </div>
 
                     <h3
-                      className={`text-[15px] font-bold mb-1 leading-[1.7] pb-[0.1em] pt-[0.1em] transition-colors duration-300 ${
+                      className={`text-[15px] font-bold mb-1 leading-[1.7] pb-[0.15em] pt-[0.1em] transition-colors duration-300 ${
                         isDark ? 'text-white' : (isAmal ? 'text-[#2C3947]' : 'text-[#15110E]')
                       } ${isAr ? 'text-right' : 'text-left'}`}
                       dir={isAr ? 'rtl' : 'ltr'}
@@ -397,7 +397,7 @@ export function CaseStudyCard({
               </div>
 
               <div>
-                <h3 className="text-white font-black text-lg leading-[1.7]">
+                <h3 className="text-white font-black text-lg leading-[1.7] pb-[0.15em]">
                   {title}
                 </h3>
                 <p className="text-stone-300 text-xs font-sans mt-1" dir="ltr">

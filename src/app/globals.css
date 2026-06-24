@@ -40,14 +40,15 @@ html[dir="rtl"] h3, html[dir="rtl"] h4, html[dir="rtl"] h5, html[dir="rtl"] h6,
   line-height: 1.5;
 }
 
-html[dir="rtl"] p, html[dir="rtl"] li,
-:lang(ar) p, :lang(ar) li {
+html[dir="rtl"] p, html[dir="rtl"] li, html[dir="rtl"] span,
+:lang(ar) p, :lang(ar) li, :lang(ar) span {
   line-height: 1.8;
 }
 
 /* Any large heading/element with font-size > 2rem */
-html[dir="rtl"] .text-3xl, html[dir="rtl"] .text-4xl, html[dir="rtl"] .text-5xl, html[dir="rtl"] .text-6xl, html[dir="rtl"] .text-7xl, html[dir="rtl"] .text-8xl,
-:lang(ar) .text-3xl, :lang(ar) .text-4xl, :lang(ar) .text-5xl, :lang(ar) .text-6xl, :lang(ar) .text-7xl, :lang(ar) .text-8xl {
+html[dir="rtl"] .text-3xl, html[dir="rtl"] .text-4xl, html[dir="rtl"] .text-5xl, html[dir="rtl"] .text-6xl, html[dir="rtl"] .text-7xl, html[dir="rtl"] .text-8xl, html[dir="rtl"] .text-9xl, html[dir="rtl"] .text-\[7rem\],
+:lang(ar) .text-3xl, :lang(ar) .text-4xl, :lang(ar) .text-5xl, :lang(ar) .text-6xl, :lang(ar) .text-7xl, :lang(ar) .text-8xl, :lang(ar) .text-9xl, :lang(ar) .text-\[7rem\],
+html[dir="rtl"] [class*="text-3xl"], html[dir="rtl"] [class*="text-4xl"], html[dir="rtl"] [class*="text-5xl"], html[dir="rtl"] [class*="text-6xl"], html[dir="rtl"] [class*="text-7xl"], html[dir="rtl"] [class*="text-8xl"], html[dir="rtl"] [class*="text-9xl"], html[dir="rtl"] [class*="text-["] {
   padding-block: 0.1em;
 }
 

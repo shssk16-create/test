@@ -62,7 +62,7 @@ export function DigitalIDCard() {
           </div>
         </div>
         <div>
-          <h2 className="text-3xl font-heading font-black text-stone-900 mb-1">سالمين هادي</h2>
+          <h2 className="text-3xl font-heading font-black text-stone-900 pb-[0.15em] mb-1">سالمين هادي</h2>
           <p className="text-sm text-stone-600 font-bold">AI Product Manager | Full-Stack Developer</p>
         </div>
         <div className="pt-4 border-t border-stone-200/50 flex justify-between items-center">
