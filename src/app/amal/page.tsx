@@ -406,10 +406,10 @@ export default function AmalPortfolio() {
                   <div className="relative overflow-hidden w-full py-2">
                     {/* Fade Gradients */}
                     <div className={`absolute left-0 top-0 bottom-0 w-8 md:w-16 z-20 pointer-events-none bg-gradient-to-r ${
-                      isDark ? 'from-[#050505] to-transparent' : 'from-[#E8EDF2] to-transparent'
+                      isDark ? 'from-[#2C3947] to-transparent' : 'from-[#E8EDF2] to-transparent'
                     }`} />
                     <div className={`absolute right-0 top-0 bottom-0 w-8 md:w-16 z-20 pointer-events-none bg-gradient-to-l ${
-                      isDark ? 'from-[#050505] to-transparent' : 'from-[#E8EDF2] to-transparent'
+                      isDark ? 'from-[#2C3947] to-transparent' : 'from-[#E8EDF2] to-transparent'
                     }`} />
 
                     <div className="marquee-container overflow-hidden w-full" dir="ltr">
