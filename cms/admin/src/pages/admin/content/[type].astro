@@ -1053,78 +1053,80 @@ const accentRgb = isAmal ? '194, 165, 109' : '161, 130, 74';
                       <div class="tag-list-container" id={`list-container-${field.name}`}></div>
 
                       <script is:inline define:vars={{ fieldName: field.name, initialItems: itemsArray }}>
-                        const hiddenInput = document.getElementById(`input-${fieldName}`);
-                        const addInput = document.getElementById(`add-input-${fieldName}`);
-                        const addBtn = document.getElementById(`btn-add-${fieldName}`);
-                        const listContainer = document.getElementById(`list-container-${fieldName}`);
+                        (() => {
+                          const hiddenInput = document.getElementById(`input-${fieldName}`);
+                          const addInput = document.getElementById(`add-input-${fieldName}`);
+                          const addBtn = document.getElementById(`btn-add-${fieldName}`);
+                          const listContainer = document.getElementById(`list-container-${fieldName}`);
 
-                        let items = [...initialItems];
+                          let items = [...initialItems];
 
-                        function renderTags() {
-                          if (!listContainer) return;
-                          listContainer.innerHTML = '';
-                          items.forEach((item, index) => {
-                            const tag = document.createElement('div');
-                            tag.className = 'tag-item';
-                            tag.innerHTML = `
-                              <span>${item}</span>
-                              <button type="button" data-index="${index}">&times;</button>
-                            `;
-                            listContainer.appendChild(tag);
-                          });
-                          if (hiddenInput) {
-                            hiddenInput.value = JSON.stringify(items);
-                          }
-                        }
-
-                        addInput?.addEventListener('keydown', (e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addBtn?.click();
-                          }
-                        });
-
-                        addBtn?.addEventListener('click', () => {
-                          const val = addInput.value.trim();
-                          if (val) {
-                            const parts = val.split(',').map(s => s.trim()).filter(Boolean);
-                            parts.forEach(part => {
-                              if (!items.includes(part)) {
-                                items.push(part);
-                              }
+                          function renderTags() {
+                            if (!listContainer) return;
+                            listContainer.innerHTML = '';
+                            items.forEach((item, index) => {
+                              const tag = document.createElement('div');
+                              tag.className = 'tag-item';
+                              tag.innerHTML = `
+                                <span>${item}</span>
+                                <button type="button" data-index="${index}">&times;</button>
+                              `;
+                              listContainer.appendChild(tag);
                             });
-                            addInput.value = '';
-                            renderTags();
-                          }
-                        });
-
-                        const form = addInput?.closest('form');
-                        form?.addEventListener('submit', () => {
-                          const val = addInput.value.trim();
-                          if (val) {
-                            const parts = val.split(',').map(s => s.trim()).filter(Boolean);
-                            parts.forEach(part => {
-                              if (!items.includes(part)) {
-                                items.push(part);
-                              }
-                            });
-                            addInput.value = '';
                             if (hiddenInput) {
                               hiddenInput.value = JSON.stringify(items);
                             }
                           }
-                        });
 
-                        listContainer?.addEventListener('click', (e) => {
-                          const btn = e.target.closest('button');
-                          if (btn && btn.type === 'button') {
-                            const index = parseInt(btn.getAttribute('data-index'), 10);
-                            items.splice(index, 1);
-                            renderTags();
-                          }
-                        });
+                          addInput?.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              addBtn?.click();
+                            }
+                          });
 
-                        renderTags();
+                          addBtn?.addEventListener('click', () => {
+                            const val = addInput.value.trim();
+                            if (val) {
+                              const parts = val.split(',').map(s => s.trim()).filter(Boolean);
+                              parts.forEach(part => {
+                                if (!items.includes(part)) {
+                                  items.push(part);
+                                }
+                              });
+                              addInput.value = '';
+                              renderTags();
+                            }
+                          });
+
+                          const form = addInput?.closest('form');
+                          form?.addEventListener('submit', () => {
+                            const val = addInput.value.trim();
+                            if (val) {
+                              const parts = val.split(',').map(s => s.trim()).filter(Boolean);
+                              parts.forEach(part => {
+                                if (!items.includes(part)) {
+                                  items.push(part);
+                                }
+                              });
+                              addInput.value = '';
+                              if (hiddenInput) {
+                                hiddenInput.value = JSON.stringify(items);
+                              }
+                            }
+                          });
+
+                          listContainer?.addEventListener('click', (e) => {
+                            const btn = e.target.closest('button');
+                            if (btn && btn.type === 'button') {
+                              const index = parseInt(btn.getAttribute('data-index'), 10);
+                              items.splice(index, 1);
+                              renderTags();
+                            }
+                          });
+
+                          renderTags();
+                        })();
                       </script>
                     </div>
                   );

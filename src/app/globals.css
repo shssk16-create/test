@@ -67,3 +67,26 @@ html[dir="rtl"] [class*="text-3xl"], html[dir="rtl"] [class*="text-4xl"], html[d
   transform: translateY(-5px);
 }
 
+@keyframes marquee {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+.animate-marquee-infinite {
+  display: flex;
+  width: max-content;
+  gap: 3rem;
+  animation: marquee 25s linear infinite;
+}
+
+@media (min-width: 768px) {
+  .animate-marquee-infinite {
+    gap: 5rem;
+  }
+}
+
+.animate-marquee-infinite:hover {
+  animation-play-state: paused;
+}
+
+

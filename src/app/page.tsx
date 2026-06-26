@@ -46,12 +46,21 @@ export function cleanNumber(num: string) {
   return cleaned;
 }
 
+export function repeatLogosToMin(logos: string[], minLength = 16) {
+  if (logos.length === 0) return [];
+  let result = [...logos];
+  while (result.length < minLength) {
+    result = [...result, ...logos];
+  }
+  return result;
+}
+
 function GlobalPortfolio() {
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState<'ar'|'en'>('ar');
   const [theme, setTheme] = useState<'dark'|'light'>('dark');
   const [mounted, setMounted] = useState(false);
-  const [brokenLogos, setBrokenLogos] = useState<Record<number, boolean>>({});
+  const [brokenLogos, setBrokenLogos] = useState<Record<string, boolean>>({});
 
   useSEO('salmeen', lang, 'home');
 
@@ -120,17 +129,19 @@ function GlobalPortfolio() {
         const logosRes = await fetch(`${apiBase}/api/logos?owner=salmeen`, { cache: 'no-store' });
         if (logosRes.ok) {
           const logosJson = await logosRes.json();
-          if (logosJson.data && Array.isArray(logosJson.data) && logosJson.data.length > 0) {
-            const sortedLogos = [...logosJson.data].sort((a: any, b: any) => {
-              const orderA = parseInt(a.sort_order || '9999', 10);
-              const orderB = parseInt(b.sort_order || '9999', 10);
-              return orderA - orderB;
-            });
-            const mappedLogos = sortedLogos.map((l: any) => {
-              return cleanCdnUrl(l.imageUrl, apiBase);
-            }).filter(Boolean);
-            if (mappedLogos.length > 0) {
+          if (logosJson.data && Array.isArray(logosJson.data)) {
+            if (logosJson.data.length > 0) {
+              const sortedLogos = [...logosJson.data].sort((a: any, b: any) => {
+                const orderA = parseInt(a.sort_order || '9999', 10);
+                const orderB = parseInt(b.sort_order || '9999', 10);
+                return orderA - orderB;
+              });
+              const mappedLogos = sortedLogos.map((l: any) => {
+                return cleanCdnUrl(l.imageUrl, apiBase);
+              }).filter(Boolean);
               setLogosData(mappedLogos);
+            } else {
+              setLogosData([]);
             }
           }
         }
@@ -285,7 +296,7 @@ function GlobalPortfolio() {
         <div className="flex gap-2 sm:gap-3 items-center shrink-0">
           <Link 
             href="/portfolio" 
-            className="flex items-center gap-2 bg-[#A1824A] hover:bg-[#8c6d32] text-black px-4.5 sm:px-6 py-3 rounded-full text-xs sm:text-sm font-black shadow-[0_4px_15px_rgba(161,130,74,0.25)] hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300"
+            className="flex items-center gap-2 bg-[#A1824A] hover:bg-[#8c6d32] text-black px-5 sm:px-6 py-3 rounded-full text-xs sm:text-sm font-black shadow-[0_4px_15px_rgba(161,130,74,0.25)] hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300"
           >
             <Sparkles size={14} />
             <span>{isAr ? 'معرض الأعمال' : 'Portfolio'}</span>
@@ -293,7 +304,7 @@ function GlobalPortfolio() {
           
           <Link 
             href="/certificates" 
-            className={`flex items-center gap-2 text-xs sm:text-sm font-black px-4.5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
+            className={`flex items-center gap-2 text-xs sm:text-sm font-black px-5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
               isDark 
                 ? 'text-stone-300 hover:text-white hover:bg-white/5 bg-white/5 border-white/10' 
                 : 'text-stone-600 hover:text-black hover:bg-stone-50 bg-white border-stone-200'
@@ -371,7 +382,7 @@ function GlobalPortfolio() {
                 href={`https://wa.me/${cleanNumber(heroData.whatsapp_number)}`} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className={`relative group px-8 md:px-10 py-4 rounded-full font-black text-xs sm:text-sm flex items-center gap-2 sm:gap-2.5 overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] shadow-[0_4px_20px_rgba(37,211,102,0.15)] ${
+                className={`relative group px-5 sm:px-6 py-3 rounded-full font-black text-xs sm:text-sm flex items-center gap-2 sm:gap-2.5 overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] shadow-[0_4px_20px_rgba(37,211,102,0.15)] ${
                   isDark ? 'bg-white text-black' : 'bg-[#15110E] text-white'
                 }`}
               >
@@ -388,27 +399,44 @@ function GlobalPortfolio() {
       </section>
 
       {/* Customer Trust Section */}
-      <section className={`pt-10 pb-28 px-4 md:px-6 border-t backdrop-blur-md z-10 flex-shrink-0 mt-auto transition-colors duration-700 ${
-        isDark ? 'border-white/5 bg-black/45' : 'border-[#15110E]/5 bg-white/45'
-      }`}>
-        <div className="max-w-7xl mx-auto flex flex-wrap justify-center items-center gap-8 md:gap-14">
-          {logosData.map((u, i) => (
-            <img 
-              key={i} 
-              src={u} 
-              alt="trust client logo"
-              onError={() => setBrokenLogos(prev => ({ ...prev, [i]: true }))}
-              className={`h-6 md:h-9 max-w-[80px] md:max-w-[120px] object-contain transition-all duration-500 ${
-                brokenLogos[i] ? 'hidden' : 'inline-block'
-              } ${
-                isDark 
-                  ? 'filter brightness-0 invert opacity-35 hover:opacity-85 hover:scale-105' 
-                  : 'filter brightness-0 opacity-55 hover:opacity-90 hover:scale-105'
-              }`} 
-            />
-          ))}
-        </div>
-      </section>
+      {(() => {
+        const activeLogos = logosData.filter(u => !brokenLogos[u]);
+        if (activeLogos.length === 0) return null;
+        const duplicatedLogos = repeatLogosToMin(activeLogos);
+        return (
+          <section className={`pt-10 pb-28 px-4 md:px-6 border-t backdrop-blur-md z-10 flex-shrink-0 mt-auto transition-colors duration-700 ${
+            isDark ? 'border-white/5 bg-black/45' : 'border-[#15110E]/5 bg-white/45'
+          }`}>
+            <div className="max-w-7xl mx-auto relative overflow-hidden">
+              {/* Fade Gradients */}
+              <div className={`absolute left-0 top-0 bottom-0 w-16 md:w-32 z-20 pointer-events-none transition-colors duration-700 bg-gradient-to-r ${
+                isDark ? 'from-black/45 to-transparent' : 'from-white/45 to-transparent'
+              }`} />
+              <div className={`absolute right-0 top-0 bottom-0 w-16 md:w-32 z-20 pointer-events-none transition-colors duration-700 bg-gradient-to-l ${
+                isDark ? 'from-black/45 to-transparent' : 'from-white/45 to-transparent'
+              }`} />
+
+              <div className="marquee-container overflow-hidden w-full" dir="ltr">
+                <div className="animate-marquee-infinite flex gap-12 md:gap-20 items-center py-2">
+                  {duplicatedLogos.map((u, i) => (
+                    <img 
+                      key={i} 
+                      src={u} 
+                      alt="trust client logo"
+                      onError={() => setBrokenLogos(prev => ({ ...prev, [u]: true }))}
+                      className={`h-6 md:h-9 max-w-[100px] md:max-w-[140px] object-contain transition-all duration-500 shrink-0 ${
+                        isDark 
+                          ? 'filter brightness-0 invert opacity-35 hover:opacity-85 hover:scale-105' 
+                          : 'filter brightness-0 opacity-55 hover:opacity-90 hover:scale-105'
+                      }`} 
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
       
       <FloatingChat />
     </motion.main>

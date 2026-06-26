@@ -60,7 +60,44 @@ const fallbackPrimaryCert: CertificateProps = {
   degree_level_en: "Degree Level: Higher Software Diploma"
 };
 
-const fallbackOtherCerts: CertificateProps[] = [];
+const fallbackOtherCerts: CertificateProps[] = [
+  {
+    id: "cert-aws-practitioner",
+    name_ar: "شهادة ممارس سحابي معتمد من AWS",
+    name_en: "AWS Certified Cloud Practitioner",
+    issuer_ar: "أمازون لخدمات الويب (AWS)",
+    issuer_en: "Amazon Web Services (AWS)",
+    date: "2024-02-15",
+    credential_url: "https://aws.amazon.com/certification/",
+    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
+    featured: false,
+    skills: ["Cloud Computing", "AWS Infrastructure", "Cloud Security"]
+  },
+  {
+    id: "cert-ccna",
+    name_ar: "أخصائي شبكات معتمد من سيسكو (CCNA)",
+    name_en: "Cisco Certified Network Associate (CCNA)",
+    issuer_ar: "أنظمة سيسكو (Cisco)",
+    issuer_en: "Cisco Systems",
+    date: "2023-11-10",
+    credential_url: "https://www.cisco.com/c/en/us/training-events/training-certifications/certifications/associate/ccna.html",
+    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80",
+    featured: false,
+    skills: ["Network Routing", "Switching", "TCP/IP Protocol", "Network Security"]
+  },
+  {
+    id: "cert-security-plus",
+    name_ar: "شهادة أمن المعلومات معتمدة (CompTIA Security+)",
+    name_en: "CompTIA Security+ Certification",
+    issuer_ar: "جمعية صناعة تكنولوجيا الحوسبة (CompTIA)",
+    issuer_en: "CompTIA",
+    date: "2024-05-20",
+    credential_url: "https://www.comptia.org/certifications/security",
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80",
+    featured: false,
+    skills: ["Cybersecurity", "Threat Intelligence", "Identity Management", "Cryptography"]
+  }
+];
 
 export function CertificateCard({
   name_ar,
@@ -250,35 +287,55 @@ export default function AmalCertificates() {
         }
         const data = await res.json();
         if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-          const mapped = data.data.map((c: any) => ({
-            id: c.id,
-            name_ar: c.name_ar || c.name || "",
-            name_en: c.name_en || c.name || "",
-            issuer_ar: c.issuer_ar || c.issuer || "",
-            issuer_en: c.issuer_en || c.issuer || "",
-            date: c.date,
-            credential_url: c.credential_url || "",
-            image: cleanCdnUrl(c.image, apiBase),
-            featured: c.featured === 1 || c.featured === true,
-            skills: c.skills,
-            description_ar: c.description_ar || "",
-            description_en: c.description_en || "",
-            degree_level_ar: c.degree_level_ar || "",
-            degree_level_en: c.degree_level_en || ""
-          }));
+          const mapped = data.data
+            .map((c: any) => ({
+              id: c.id,
+              name_ar: c.name_ar || c.name || "",
+              name_en: c.name_en || c.name || "",
+              issuer_ar: c.issuer_ar || c.issuer || "",
+              issuer_en: c.issuer_en || c.issuer || "",
+              date: c.date,
+              credential_url: c.credential_url || "",
+              image: cleanCdnUrl(c.image, apiBase),
+              featured: c.featured === 1 || c.featured === true,
+              skills: c.skills,
+              description_ar: c.description_ar || "",
+              description_en: c.description_en || "",
+              degree_level_ar: c.degree_level_ar || "",
+              degree_level_en: c.degree_level_en || ""
+            }))
+            .filter((c: any) => {
+              // Programmatically filter out placeholder/test cards (e.g. sss/ss)
+              const cleanName = c.name_en.trim().toLowerCase();
+              const cleanIssuer = c.issuer_en.trim().toLowerCase();
+              return (
+                cleanName !== "sss" &&
+                cleanName !== "test" &&
+                cleanIssuer !== "ss" &&
+                cleanIssuer !== "test" &&
+                cleanName.length >= 4 &&
+                cleanIssuer.length >= 2
+              );
+            });
 
-          const featured = mapped.find((c: any) => c.featured);
-          const others = mapped.filter((c: any) => c.id !== (featured?.id || ''));
-          
-          if (featured) {
+          if (mapped.length > 0) {
+            const featured = mapped.find((c: any) => c.featured) || mapped[0];
+            const others = mapped.filter((c: any) => c.id !== (featured?.id || ''));
+            
             setPrimaryCert(featured);
-          }
-          if (others.length > 0) {
             setOtherCerts(others);
+          } else {
+            setPrimaryCert(fallbackPrimaryCert);
+            setOtherCerts(fallbackOtherCerts);
           }
+        } else {
+          setPrimaryCert(fallbackPrimaryCert);
+          setOtherCerts(fallbackOtherCerts);
         }
       } catch (err) {
         console.warn("CMS API is offline. Using fallback local certificates data.");
+        setPrimaryCert(fallbackPrimaryCert);
+        setOtherCerts(fallbackOtherCerts);
       }
     }
 
@@ -434,7 +491,7 @@ export default function AmalCertificates() {
           <div className="flex gap-2 sm:gap-3 items-center shrink-0">
             <Link 
               href={basePrefix || "/"} 
-              className={`flex items-center gap-2 text-xs sm:text-sm font-black px-4.5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
+              className={`flex items-center justify-center gap-2 text-xs sm:text-sm font-black w-[115px] sm:w-[145px] px-2 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
                 isDark 
                   ? 'text-[#E8EDF2]/90 hover:text-white hover:bg-white/5 bg-[#E8EDF2]/10 border-white/10' 
                   : 'text-[#2C3947]/80 hover:text-black hover:bg-[#E8EDF2]/30 bg-white border-[#547A95]/30'
@@ -446,7 +503,7 @@ export default function AmalCertificates() {
             
             <Link 
               href={`${basePrefix}/portfolio`} 
-              className={`flex items-center gap-2 text-xs sm:text-sm font-black px-4.5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
+              className={`flex items-center justify-center gap-2 text-xs sm:text-sm font-black w-[115px] sm:w-[145px] px-2 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
                 isDark 
                   ? 'text-[#E8EDF2]/90 hover:text-white hover:bg-white/5 bg-[#E8EDF2]/10 border-white/10' 
                   : 'text-[#2C3947]/80 hover:text-black hover:bg-[#E8EDF2]/30 bg-white border-[#547A95]/30'
@@ -458,7 +515,7 @@ export default function AmalCertificates() {
             
             <button 
               onClick={toggleLang} 
-              className={`border px-4 sm:px-5 py-3 rounded-full text-xs sm:text-sm font-black shadow-sm hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C2A56D]/40 cursor-pointer ${
+              className={`flex items-center justify-center border w-[115px] sm:w-[145px] px-2 py-3 rounded-full text-xs sm:text-sm font-black shadow-sm hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C2A56D]/40 cursor-pointer ${
                 isDark ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-white text-[#2C3947] border-[#547A95]/30 hover:bg-stone-50'
               }`}
             >

@@ -504,6 +504,66 @@ export function WorksSection({ owner = 'salmeen' }: { owner?: string }) {
     },
   ];
 
+  const amalSeedData: CaseStudyProps[] = [
+    {
+      title_ar: "ترقية الشبكة المؤسسية ونظام الوصول الموحد Zero-Trust",
+      title_en: "Enterprise Network Upgrade & Zero-Trust Access",
+      subtitle_ar: "تصميم وتنفيذ شبكة آمنة تدعم العمل عن بعد لـ 300+ موظف",
+      subtitle_en: "Design & implementation of secure remote access for 300+ employees",
+      category: ["Infrastructure", "Security"],
+      accentColor: "#438FB3",
+      thumbIcon: "Cpu",
+      problem_ar: "كانت فروع الشركة المتعددة تعتمد على شبكات VPN قديمة وبطيئة، مما أدى إلى ثغرات أمنية وصعوبة في إدارة صلاحيات الوصول للموظفين.",
+      problem_en: "The company relied on legacy, slow VPNs, resulting in security vulnerabilities and complex access management across multiple regional branches.",
+      decision_ar: "تنفيذ معمارية Zero-Trust باستخدام Cloudflare Access وتحديث البنية التحتية للشبكة بروابط SD-WAN آمنة وجدران حماية متطورة.",
+      decision_en: "Deployed Cloudflare Access for role-based identity authentication and upgraded network infrastructure with secure SD-WAN and Fortinet firewalls.",
+      result_ar: "تأمين وصول الموظفين بنسبة 100%، وتقليل زمن استجابة الشبكة بمقدار 40%، مع إمكانية إدارة الصلاحيات مركزيًا بدقة.",
+      result_en: "100% secure remote access achieved, network latency reduced by 40%, and centralized identity management deployed.",
+      stack: ["Cloudflare Access", "SD-WAN", "Fortinet", "IAM"],
+      year: "2024",
+      featured: true,
+      image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      title_ar: "ترحيل البنية التحتية السحابية لشركة أساس القابضة",
+      title_en: "Enterprise Cloud Migration for Asas Holding",
+      subtitle_ar: "ترحيل الخوادم المحلية إلى بيئة AWS سحابية هجينة",
+      subtitle_en: "Migrating on-prem server infrastructure to AWS hybrid cloud",
+      category: ["Cloud", "Infrastructure"],
+      accentColor: "#58A8B4",
+      thumbIcon: "Workflow",
+      problem_ar: "ارتفاع تكاليف صيانة الخوادم المحلية وصعوبة التوسع لمواجهة زيادة ضغط العمليات اليومية.",
+      problem_en: "High maintenance costs of legacy on-prem hardware and scaling issues during peak operational hours.",
+      decision_ar: "بناء وتصميم بنية تحتية سحابية هجينة على AWS باستخدام Terraform كأكواد (IaC) مع تطبيق معايير الأمان المتقدمة.",
+      decision_en: "Architected and migrated workloads to AWS using Terraform IaC, setting up secure VPCs, autoscaling, and RDS databases.",
+      result_ar: "تخفيض التكاليف التشغيلية بنسبة 35% وضمان استقرار الخدمات بنسبة 99.99% مع إمكانية التوسع التلقائي.",
+      result_en: "Reduced infrastructure costs by 35% and achieved 99.99% availability with automatic horizontal scaling.",
+      stack: ["AWS", "Terraform", "Docker", "S3"],
+      year: "2023",
+      featured: false,
+      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      title_ar: "أتمتة الدعم الفني وتقنية المعلومات عبر الذكاء الاصطناعي",
+      title_en: "AI-Powered IT Support Desk Automation",
+      subtitle_ar: "تطوير مساعد ذكي لأتمتة حل المشاكل التقنية وحوكمة التذاكر",
+      subtitle_en: "Developing an AI agent to resolve technical queries and route tickets",
+      category: ["AI & Automation"],
+      accentColor: "#3C3489",
+      thumbIcon: "Sparkles",
+      problem_ar: "تأخر الردود على طلبات الدعم الفني البسيطة للموظفين مما أثر سلبًا على الإنتاجية وضاعف عبء العمل الفني.",
+      problem_en: "High volume of simple password-resets and software requests clogged the IT queue, slowing response times.",
+      decision_ar: "ربط نظام تذاكر Jira بمحرك ذكاء اصطناعي ونظام أتمتة n8n لحل المشاكل الروتينية تلقائيًا.",
+      decision_en: "Integrated Jira Service Desk with an LLM agent via n8n automation to resolve common queries and categorize incoming requests.",
+      result_ar: "حل 60% من التذاكر الروتينية تلقائيًا دون تدخل بشري، وتقليل وقت إغلاق التذاكر من ساعات إلى دقائق.",
+      result_en: "Automated 60% of routine tickets, reducing average resolution time from hours to under 2 minutes.",
+      stack: ["n8n", "Jira API", "Gemini API", "Python"],
+      year: "2024",
+      featured: false,
+      image: "https://images.unsplash.com/photo-1531747118685-ca8fa6e08806?auto=format&fit=crop&w=800&q=80",
+    }
+  ];
+
   useEffect(() => {
     setMounted(true);
     const checkState = () => {
@@ -534,61 +594,65 @@ export function WorksSection({ owner = 'salmeen' }: { owner?: string }) {
           throw new Error(`Failed to fetch: ${res.statusText}`);
         }
         const data = await res.json();
-        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-          const parsed = data.data.map((item: any) => {
-            let cat: string[] = ["SaaS"];
-            try {
-              if (item.category) {
-                cat = typeof item.category === 'string' ? JSON.parse(item.category) : item.category;
-                if (!Array.isArray(cat)) cat = [cat];
+        if (data.data && Array.isArray(data.data)) {
+          if (data.data.length > 0) {
+            const parsed = data.data.map((item: any) => {
+              let cat: string[] = ["SaaS"];
+              try {
+                if (item.category) {
+                  cat = typeof item.category === 'string' ? JSON.parse(item.category) : item.category;
+                  if (!Array.isArray(cat)) cat = [cat];
+                }
+              } catch (e) {
+                if (typeof item.category === 'string') {
+                  cat = item.category.split(',').map((s: string) => s.trim());
+                }
               }
-            } catch (e) {
-              if (typeof item.category === 'string') {
-                cat = item.category.split(',').map((s: string) => s.trim());
-              }
-            }
 
-            let st: string[] = [];
-            try {
-              if (item.stack) {
-                st = typeof item.stack === 'string' ? JSON.parse(item.stack) : item.stack;
-                if (!Array.isArray(st)) st = [st];
+              let st: string[] = [];
+              try {
+                if (item.stack) {
+                  st = typeof item.stack === 'string' ? JSON.parse(item.stack) : item.stack;
+                  if (!Array.isArray(st)) st = [st];
+                }
+              } catch (e) {
+                if (typeof item.stack === 'string') {
+                  st = item.stack.split(',').map((s: string) => s.trim());
+                }
               }
-            } catch (e) {
-              if (typeof item.stack === 'string') {
-                st = item.stack.split(',').map((s: string) => s.trim());
-              }
-            }
 
-            return {
-              title_ar: item.title_ar || item.title || "",
-              title_en: item.title_en || item.title || "",
-              subtitle_ar: item.subtitle_ar || item.subtitle || "",
-              subtitle_en: item.subtitle_en || item.subtitle || "",
-              category: cat,
-              accentColor: item.accentColor || "#58A8B4",
-              thumbIcon: item.thumbIcon || "Sparkles",
-              problem_ar: item.problem_ar || item.problem || "",
-              problem_en: item.problem_en || item.problem || "",
-              decision_ar: item.decision_ar || item.decision || "",
-              decision_en: item.decision_en || item.decision || "",
-              result_ar: item.result_ar || item.result || "",
-              result_en: item.result_en || item.result || "",
-              stack: st,
-              year: item.year,
-              featured: item.featured === 1 || item.featured === true,
-              logo: cleanCdnUrl(item.logo, apiBase),
-              image: cleanCdnUrl(item.image, apiBase),
-              link: item.link || ""
-            };
-          });
-          setCardsData(parsed);
+              return {
+                title_ar: item.title_ar || item.title || "",
+                title_en: item.title_en || item.title || "",
+                subtitle_ar: item.subtitle_ar || item.subtitle || "",
+                subtitle_en: item.subtitle_en || item.subtitle || "",
+                category: cat,
+                accentColor: item.accentColor || "#58A8B4",
+                thumbIcon: item.thumbIcon || "Sparkles",
+                problem_ar: item.problem_ar || item.problem || "",
+                problem_en: item.problem_en || item.problem || "",
+                decision_ar: item.decision_ar || item.decision || "",
+                decision_en: item.decision_en || item.decision || "",
+                result_ar: item.result_ar || item.result || "",
+                result_en: item.result_en || item.result || "",
+                stack: st,
+                year: item.year,
+                featured: item.featured === 1 || item.featured === true,
+                logo: cleanCdnUrl(item.logo, apiBase),
+                image: cleanCdnUrl(item.image, apiBase),
+                link: item.link || ""
+              };
+            });
+            setCardsData(parsed);
+          } else {
+            setCardsData([]);
+          }
         } else {
-          setCardsData(owner === 'amal' ? [] : seedData);
+          setCardsData(owner === 'amal' ? amalSeedData : seedData);
         }
       } catch (err) {
         console.warn("CMS API is offline. Using fallback local project data.");
-        setCardsData(owner === 'amal' ? [] : seedData);
+        setCardsData(owner === 'amal' ? amalSeedData : seedData);
       }
     }
 
@@ -701,36 +765,76 @@ export function WorksSection({ owner = 'salmeen' }: { owner?: string }) {
           ))}
         </div>
 
-        {/* Responsive Bento Grid Layout */}
-        <motion.div 
-          layout 
-          className={`grid gap-6 mt-4 ${
-            filteredCards.length === 1 
-              ? 'grid-cols-1 max-w-2xl mx-auto w-full' 
-              : filteredCards.length === 2 
-                ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto w-full' 
-                : 'grid-cols-1 md:grid-cols-3 w-full'
-          }`}
-        >
-          <AnimatePresence mode="popLayout">
-            {filteredCards.map((card, index) => {
-              const span = getBentoSpan(index, filteredCards.length);
-              return (
-                <motion.div
-                  key={card.title_en}
-                  layout
-                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                  className={getBentoClasses(span)}
-                >
-                  <CaseStudyCard {...card} isDark={isDark} isAr={isAr} owner={owner} span={span} />
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </motion.div>
+        {/* Responsive Bento Grid Layout or Empty State */}
+        {filteredCards.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`w-full max-w-md mx-auto text-center py-16 px-6 rounded-[28px] border flex flex-col items-center gap-4 ${
+              isDark
+                ? (isAmal ? 'bg-[#2C3947]/40 border-white/5' : 'bg-white/5 border-white/5')
+                : (isAmal ? 'bg-white/50 border-[#547A95]/20 shadow-sm' : 'bg-white border-stone-200 shadow-sm')
+            } backdrop-blur-xl`}
+          >
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+              isDark ? 'bg-white/5 text-zinc-500 border border-white/5' : 'bg-stone-100 text-stone-400 border border-stone-200'
+            }`}>
+              <Workflow size={20} className="animate-pulse" />
+            </div>
+            <div className="space-y-1">
+              <h3 className={`text-sm font-black ${isDark ? 'text-white' : (isAmal ? 'text-[#2C3947]' : 'text-[#15110E]')}`}>
+                {isAr ? "لا توجد مشاريع مضافة" : "No Projects Found"}
+              </h3>
+              <p className={`text-[10px] leading-relaxed max-w-[32ch] mx-auto ${isDark ? 'text-zinc-450' : 'text-stone-400'}`}>
+                {isAr 
+                  ? "لم يتم إضافة أي مشاريع في هذا القسم بعد. يرجى اختيار قسم آخر." 
+                  : "No projects have been added under this category yet. Please select another filter."}
+              </p>
+            </div>
+            {activeFilter !== "All" && (
+              <button
+                onClick={() => setActiveFilter("All")}
+                className={`mt-2 px-5 py-2.5 rounded-full text-[10px] font-black transition-all hover:scale-105 active:scale-95 border cursor-pointer ${
+                  isAmal
+                    ? "bg-[#C2A56D] text-black border-[#C2A56D] shadow-sm hover:bg-[#b39158]"
+                    : "bg-[#A1824A] text-black border-[#A1824A] shadow-sm hover:bg-[#8c6d32]"
+                }`}
+              >
+                {isAr ? "عرض كل المشاريع" : "Show All Projects"}
+              </button>
+            )}
+          </motion.div>
+        ) : (
+          <motion.div 
+            layout 
+            className={`grid gap-6 mt-4 ${
+              filteredCards.length === 1 
+                ? 'grid-cols-1 max-w-2xl mx-auto w-full' 
+                : filteredCards.length === 2 
+                  ? 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto w-full' 
+                  : 'grid-cols-1 md:grid-cols-3 w-full'
+            }`}
+          >
+            <AnimatePresence mode="popLayout">
+              {filteredCards.map((card, index) => {
+                const span = getBentoSpan(index, filteredCards.length);
+                return (
+                  <motion.div
+                    key={card.title_en}
+                    layout
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className={getBentoClasses(span)}
+                  >
+                    <CaseStudyCard {...card} isDark={isDark} isAr={isAr} owner={owner} span={span} />
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </motion.div>
+        )}
       </div>
     </section>
   );

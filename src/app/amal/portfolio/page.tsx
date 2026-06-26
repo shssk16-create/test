@@ -167,7 +167,7 @@ export default function AmalPortfolioPage() {
           <div className="flex gap-2 sm:gap-3 items-center shrink-0">
             <Link 
               href={basePrefix || "/"} 
-              className={`flex items-center gap-2 text-xs sm:text-sm font-black px-4.5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
+              className={`flex items-center gap-2 text-xs sm:text-sm font-black px-5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
                 isDark 
                   ? 'text-[#E8EDF2]/90 hover:text-white hover:bg-white/5 bg-[#E8EDF2]/10 border-white/10' 
                   : 'text-[#2C3947]/80 hover:text-black hover:bg-[#E8EDF2]/30 bg-white border-[#547A95]/30'
@@ -179,7 +179,7 @@ export default function AmalPortfolioPage() {
             
             <Link 
               href={`${basePrefix}/certificates`} 
-              className={`flex items-center gap-2 text-xs sm:text-sm font-black px-4.5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
+              className={`flex items-center gap-2 text-xs sm:text-sm font-black px-5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
                 isDark 
                   ? 'text-[#E8EDF2]/90 hover:text-white hover:bg-white/5 bg-[#E8EDF2]/10 border-white/10' 
                   : 'text-[#2C3947]/80 hover:text-black hover:bg-[#E8EDF2]/30 bg-white border-[#547A95]/30'

@@ -172,7 +172,7 @@ function Portfolio() {
           <div className="flex gap-2 sm:gap-3 items-center shrink-0">
             <Link 
               href="/" 
-              className={`flex items-center gap-2 text-xs sm:text-sm font-black px-4.5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
+              className={`flex items-center gap-2 text-xs sm:text-sm font-black px-5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
                 isDark 
                   ? 'text-stone-300 hover:text-white hover:bg-white/5 bg-white/5 border-white/10' 
                   : 'text-stone-600 hover:text-black hover:bg-stone-50 bg-white border-stone-200'
@@ -184,7 +184,7 @@ function Portfolio() {
             
             <Link 
               href="/certificates" 
-              className={`flex items-center gap-2 text-xs sm:text-sm font-black px-4.5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
+              className={`flex items-center gap-2 text-xs sm:text-sm font-black px-5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
                 isDark 
                   ? 'text-stone-300 hover:text-white hover:bg-white/5 bg-white/5 border-white/10' 
                   : 'text-stone-600 hover:text-black hover:bg-stone-50 bg-white border-stone-200'
