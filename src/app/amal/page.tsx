@@ -386,49 +386,57 @@ export default function AmalPortfolio() {
                 </span>
               </a>
             </motion.div>
+            
+            {(() => {
+              const activeLogos = logosData.filter(u => !brokenLogos[u]);
+              if (activeLogos.length === 0) return null;
+              const baseLogos = repeatLogosToMin(activeLogos, 20);
+              const duplicatedLogos = [...baseLogos, ...baseLogos];
+              return (
+                <motion.div 
+                  variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} 
+                  className="w-full max-w-3xl mt-12 md:mt-16 space-y-4"
+                >
+                  <p className={`text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] ${
+                    isDark ? 'text-stone-500' : 'text-stone-400'
+                  }`}>
+                    {isAr ? 'شراكات وتجارب عمل ناجحة' : 'Trusted by & Collaborations'}
+                  </p>
+                  
+                  <div className="relative overflow-hidden w-full py-2">
+                    {/* Fade Gradients */}
+                    <div className={`absolute left-0 top-0 bottom-0 w-8 md:w-16 z-20 pointer-events-none bg-gradient-to-r ${
+                      isDark ? 'from-[#050505] to-transparent' : 'from-[#E8EDF2] to-transparent'
+                    }`} />
+                    <div className={`absolute right-0 top-0 bottom-0 w-8 md:w-16 z-20 pointer-events-none bg-gradient-to-l ${
+                      isDark ? 'from-[#050505] to-transparent' : 'from-[#E8EDF2] to-transparent'
+                    }`} />
+
+                    <div className="marquee-container overflow-hidden w-full" dir="ltr">
+                      <div className="animate-marquee-infinite flex gap-10 md:gap-16 items-center">
+                        {duplicatedLogos.map((u, i) => (
+                          <img 
+                            key={i} 
+                            src={u} 
+                            alt="trust client logo"
+                            onError={() => setBrokenLogos(prev => ({ ...prev, [u]: true }))}
+                            className={`h-5 md:h-7 max-w-[85px] md:max-w-[115px] object-contain transition-all duration-500 shrink-0 ${
+                              isDark 
+                                ? 'filter brightness-0 invert opacity-30 hover:opacity-85 hover:scale-105' 
+                                : 'filter brightness-0 opacity-40 hover:opacity-90 hover:scale-105'
+                            }`} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })()}
           </motion.div>
         </AnimatePresence>
       </section>
 
-      {/* Customer Trust Section */}
-      {(() => {
-        const activeLogos = logosData.filter(u => !brokenLogos[u]);
-        if (activeLogos.length === 0) return null;
-        const duplicatedLogos = repeatLogosToMin(activeLogos);
-        return (
-          <section className={`pt-10 pb-28 px-4 md:px-6 border-t backdrop-blur-md z-10 flex-shrink-0 mt-auto transition-colors duration-700 ${
-            isDark ? 'border-white/5 bg-black/45' : 'border-[#2C3947]/5 bg-[#E8EDF2]/45'
-          }`}>
-            <div className="max-w-7xl mx-auto relative overflow-hidden">
-              {/* Fade Gradients */}
-              <div className={`absolute left-0 top-0 bottom-0 w-16 md:w-32 z-20 pointer-events-none transition-colors duration-700 bg-gradient-to-r ${
-                isDark ? 'from-black/45 to-transparent' : 'from-[#E8EDF2]/45 to-transparent'
-              }`} />
-              <div className={`absolute right-0 top-0 bottom-0 w-16 md:w-32 z-20 pointer-events-none transition-colors duration-700 bg-gradient-to-l ${
-                isDark ? 'from-black/45 to-transparent' : 'from-[#E8EDF2]/45 to-transparent'
-              }`} />
-
-              <div className="marquee-container overflow-hidden w-full" dir="ltr">
-                <div className="animate-marquee-infinite flex gap-12 md:gap-20 items-center py-2">
-                  {duplicatedLogos.map((u, i) => (
-                    <img 
-                      key={i} 
-                      src={u} 
-                      alt="trust client logo"
-                      onError={() => setBrokenLogos(prev => ({ ...prev, [u]: true }))}
-                      className={`h-6 md:h-9 max-w-[100px] md:max-w-[140px] object-contain transition-all duration-500 shrink-0 ${
-                        isDark 
-                          ? 'filter brightness-0 invert opacity-35 hover:opacity-85 hover:scale-105' 
-                          : 'opacity-85 hover:opacity-100 hover:scale-105'
-                      }`} 
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-        );
-      })()}
       
       <FloatingChat owner="amal" />
     </motion.main>
