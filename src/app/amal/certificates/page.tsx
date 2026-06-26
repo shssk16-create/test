@@ -281,7 +281,7 @@ export default function AmalCertificates() {
     async function fetchCertificates() {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
       try {
-        const res = await fetch(`${apiBase}/api/certificates?owner=amal`, { cache: 'no-store' });
+        const res = await fetch(`${apiBase}/api/certificates?owner=amal&limit=100`, { cache: 'no-store' });
         if (!res.ok) {
           throw new Error(`Failed to fetch: ${res.statusText}`);
         }

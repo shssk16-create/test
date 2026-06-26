@@ -589,7 +589,7 @@ export function WorksSection({ owner = 'salmeen' }: { owner?: string }) {
     async function fetchProjects() {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
       try {
-        const res = await fetch(`${apiBase}/api/projects?owner=${owner}`, { cache: 'no-store' });
+        const res = await fetch(`${apiBase}/api/projects?owner=${owner}&limit=100`, { cache: 'no-store' });
         if (!res.ok) {
           throw new Error(`Failed to fetch: ${res.statusText}`);
         }

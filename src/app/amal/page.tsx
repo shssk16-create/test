@@ -117,7 +117,7 @@ export default function AmalPortfolio() {
       }
 
       try {
-        const logosRes = await fetch(`${apiBase}/api/logos?owner=amal`, { cache: 'no-store' });
+        const logosRes = await fetch(`${apiBase}/api/logos?owner=amal&limit=100`, { cache: 'no-store' });
         if (logosRes.ok) {
           const logosJson = await logosRes.json();
           if (logosJson.data && Array.isArray(logosJson.data)) {
