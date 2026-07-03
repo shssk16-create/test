@@ -1,12 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import FloatingChat from "@/components/FloatingChat";
-import ParticleNetwork from "@/components/ParticleNetwork";
-import { Phone, Sparkles, ArrowLeft, ArrowRight, Award, Moon, Sun, Layout, Lock } from "lucide-react";
+
+import { useState, useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import AmalPortfolio from "./amal/page";
 import { useSEO } from "@/hooks/useSEO";
+import FloatingChat from "@/components/FloatingChat";
+import { Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function HomeRoute() {
   const isAmalDeploy = process.env.NEXT_PUBLIC_OWNER === 'amal';
@@ -16,82 +18,106 @@ export default function HomeRoute() {
   return <GlobalPortfolio />;
 }
 
-export function cleanCdnUrl(url: string, apiBase: string) {
-  if (!url) return "";
-  if (url.startsWith('/')) {
-    return `${apiBase}${url}`;
-  }
-  if (url.includes('/api/media/download')) {
-    try {
-      const urlObj = new URL(url);
-      const key = urlObj.searchParams.get('key');
-      if (key) {
-        return `${apiBase}/api/media/download?key=${encodeURIComponent(key)}`;
-      }
-    } catch (e) {
-      console.warn("Failed to parse URL:", url);
-    }
-  }
-  return url;
-}
-
-export function cleanNumber(num: string) {
-  if (!num) return "";
-  let cleaned = num.replace(/\D/g, '');
-  if (cleaned.startsWith('05') && cleaned.length === 10) {
-    cleaned = '966' + cleaned.substring(1);
-  } else if (cleaned.startsWith('5') && cleaned.length === 9) {
-    cleaned = '966' + cleaned;
-  }
-  return cleaned;
-}
-
-export function repeatLogosToMin(logos: string[], minLength = 16) {
-  if (logos.length === 0) return [];
-  let result = [...logos];
-  while (result.length < minLength) {
-    result = [...result, ...logos];
-  }
-  return result;
-}
+// Convert numbers to East Arabic digits
+const toEastArabic = (num: number | string): string => {
+  const digits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return String(num).split('').map(char => {
+    const d = parseInt(char);
+    return isNaN(d) ? char : digits[d];
+  }).join('');
+};
 
 function GlobalPortfolio() {
-  const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState<'ar'|'en'>('ar');
-  const [theme, setTheme] = useState<'dark'|'light'>('dark');
   const [mounted, setMounted] = useState(false);
-  const [brokenLogos, setBrokenLogos] = useState<Record<string, boolean>>({});
+  const [scrolled, setScrolled] = useState(false);
+  const [projectsList, setProjectsList] = useState<any[]>([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  useSEO('salmeen', lang, 'home');
+  // Fetch SEO & Hero metadata from CMS D1 database (dynamically responds to active language)
+  const seo = useSEO('salmeen', lang, 'home');
 
-  const [heroData, setHeroData] = useState({
-    name_ar: "سالمين هادي.",
-    name_en: "Salmeen Hadi.",
-    title_ar: "مدير منتجات ذكاء اصطناعي",
-    title_en: "AI Product Manager",
-    subtitle_ar: "أبني منصات رقمية متكاملة. يمكنك تصفح معرض أعمالي من الأعلى، أو التحدث مباشرة مع مساعدي الذكي ليجيب على كافة استفساراتك حول خبراتي وتقنياتي.",
-    subtitle_en: "Building comprehensive digital platforms. Explore my portfolio from the menu above or chat with my custom-built AI assistant for any inquiries.",
-    whatsapp_number: "966503026795"
-  });
+  // Fallback seed projects
+  const fallbackProjects = [
+    {
+      num: "01",
+      name_ar: "هالة AI OS",
+      name_en: "Hala AI OS",
+      desc_ar: "نظام تشغيل ذكي مدمج مع الواتساب مبني لحل مشاكل التجار في منصات سلة وزد.",
+      desc_en: "Smart operating system integrated with WhatsApp built for Zid and Salla merchants.",
+      tech: "CLOUDFLARE / HONO.JS / LLMS",
+      link: "https://salla.sa"
+    },
+    {
+      num: "02",
+      name_ar: "درب منصة",
+      name_en: "Darb Platform",
+      desc_ar: "أتمتة متكاملة لخطوط إمداد وتوزيع الخدمات وحجز المحطات لقطاع الخدمات اللوجستية.",
+      desc_en: "Comprehensive automation for supply chains, service distribution, and station booking.",
+      tech: "LARAVEL / LIVEWIRE / POSTGRESQL",
+      link: "https://darbstations.com.sa"
+    },
+    {
+      num: "03",
+      name_ar: "أورا للتسويق",
+      name_en: "Aura Marketing",
+      desc_ar: "موقع الوكالة الرقمية لتسويق وتطوير المنتجات البرمجية وتكامل هندسة اللغويات العربية.",
+      desc_en: "Digital agency site for marketing, software product dev, and Arabic linguistics integration.",
+      tech: "NEXT.JS / TAILWIND CSS / SEO",
+      link: "https://aurateam3.com"
+    },
+    {
+      num: "04",
+      name_ar: "مالم أورا",
+      name_en: "Malam Aura",
+      desc_ar: "نظام أتمتة وبناء خطوط إنتاج المحتوى الترويجي والجدولة الآلية للشبكات الاجتماعية.",
+      desc_en: "Automation engine for promotional content production pipelines and social scheduling.",
+      tech: "N8N / GROQ / TELEGRAM API",
+      link: "https://aurateam3.com"
+    },
+    {
+      num: "05",
+      name_ar: "بثق",
+      name_en: "Bathq",
+      desc_ar: "منصة الخدمات السحابية ومصادقة هويات المستخدمين ونظم الوصول الآمن للمؤسسات.",
+      desc_en: "Cloud services platform, identity authentication, and secure enterprise access systems.",
+      tech: "SUPABASE / DOCKER / AUTH",
+      link: ""
+    }
+  ];
 
-  const [logosData, setLogosData] = useState<string[]>([
-    "https://aurateam3.com/wp-content/uploads/2024/02/cropped-%D8%B4%D8%B9%D8%A7%D8%B1-%D8%A3%D9%88%D8%B1%D8%A7-02-2.png",
-    "https://floralwhite-dove-225940.hostingersite.com/wp-content/uploads/2025/12/%D8%A3%D8%B3%D8%A7%D8%B3-1.webp",
-    "https://akamcont.sa/wp-content/uploads/2025/11/cropped-1000034239.webp",
-    "https://redp-sa.com/web/images/logo.svg",
-    "https://bathq.sa/wp-content/uploads/2025/11/1000033762.webp",
-    "https://darbstations.com.sa/wp-content/uploads/2024/12/1221-copy-3.png"
-  ]);
-
-  useEffect(() => { 
+  // Set language & scrolled states
+  useEffect(() => {
     setMounted(true);
-    const l = localStorage.getItem('sk_lang');
-    const th = localStorage.getItem('sk_theme');
-    if(l) setLang(l as 'ar'|'en');
-    if(th) setTheme(th as 'dark'|'light');
-    setTimeout(() => setLoading(false), 1800); 
+    document.documentElement.classList.remove('amal-theme');
+    
+    const savedLang = localStorage.getItem('sk_lang') as 'ar'|'en';
+    if (savedLang) setLang(savedLang);
+
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Listen to lang-change events
+  useEffect(() => {
+    const handleLangChange = () => {
+      const savedLang = localStorage.getItem('sk_lang') as 'ar'|'en';
+      if (savedLang) setLang(savedLang);
+    };
+    window.addEventListener('lang-change', handleLangChange);
+    return () => window.removeEventListener('lang-change', handleLangChange);
+  }, []);
+
+  // Set document attributes
   useEffect(() => {
     if (mounted) {
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -99,59 +125,170 @@ function GlobalPortfolio() {
     }
   }, [lang, mounted]);
 
+  // Fetch projects from CMS D1 database
   useEffect(() => {
     if (!mounted) return;
 
-    async function fetchHeroAndLogos() {
+    async function fetchProjects() {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
       try {
-        const heroRes = await fetch(`${apiBase}/api/heroes?owner=salmeen`, { cache: 'no-store' });
-        if (heroRes.ok) {
-          const heroJson = await heroRes.json();
-          if (heroJson.data && Array.isArray(heroJson.data) && heroJson.data.length > 0) {
-            const firstHero = heroJson.data[0];
-            setHeroData({
-              name_ar: firstHero.name_ar || "سالمين هادي.",
-              name_en: firstHero.name_en || "Salmeen Hadi.",
-              title_ar: firstHero.title_ar || "مدير منتجات ذكاء اصطناعي",
-              title_en: firstHero.title_en || "AI Product Manager",
-              subtitle_ar: firstHero.subtitle_ar || "أبني منصات رقمية متكاملة. يمكنك تصفح معرض أعمالي من الأعلى، أو التحدث مباشرة مع مساعدي الذكي ليجيب على كافة استفساراتك حول خبراتي وتقنياتي.",
-              subtitle_en: firstHero.subtitle_en || "Building comprehensive digital platforms. Explore my portfolio from the menu above or chat with my custom-built AI assistant for any inquiries.",
-              whatsapp_number: firstHero.whatsapp_number || "966503026795"
+        const res = await fetch(`${apiBase}/api/projects?owner=salmeen&limit=100`, { cache: 'no-store' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+            const mapped = json.data.map((item: any, idx: number) => {
+              let st = "";
+              try {
+                if (item.stack) {
+                  const parsed = typeof item.stack === 'string' ? JSON.parse(item.stack) : item.stack;
+                  if (Array.isArray(parsed)) st = parsed.join(" / ").toUpperCase();
+                }
+              } catch (e) {
+                if (typeof item.stack === 'string') {
+                  st = item.stack.split(',').map((s: string) => s.trim().toUpperCase()).join(' / ');
+                }
+              }
+              return {
+                num: String(idx + 1).padStart(2, '0'),
+                name_ar: item.title_ar || item.title || "",
+                name_en: item.title_en || item.title || "",
+                desc_ar: item.subtitle_ar || item.subtitle || "",
+                desc_en: item.subtitle_en || item.subtitle || "",
+                tech: st || (item.tech || ""),
+                link: item.link || ""
+              };
             });
+            setProjectsList(mapped);
           }
         }
       } catch (err) {
-        console.warn("CMS API is offline. Using local hero fallback.");
-      }
-
-      try {
-        const logosRes = await fetch(`${apiBase}/api/logos?owner=salmeen&limit=100`, { cache: 'no-store' });
-        if (logosRes.ok) {
-          const logosJson = await logosRes.json();
-          if (logosJson.data && Array.isArray(logosJson.data)) {
-            if (logosJson.data.length > 0) {
-              const sortedLogos = [...logosJson.data].sort((a: any, b: any) => {
-                const orderA = parseInt(a.sort_order || '9999', 10);
-                const orderB = parseInt(b.sort_order || '9999', 10);
-                return orderA - orderB;
-              });
-              const mappedLogos = sortedLogos.map((l: any) => {
-                return cleanCdnUrl(l.imageUrl, apiBase);
-              }).filter(Boolean);
-              setLogosData(mappedLogos);
-            } else {
-              setLogosData([]);
-            }
-          }
-        }
-      } catch (err) {
-        console.warn("CMS API is offline. Using local logos fallback.");
+        console.warn("Failed to fetch projects from CMS", err);
       }
     }
 
-    fetchHeroAndLogos();
+    fetchProjects();
   }, [mounted]);
+
+  const activeProjects = projectsList.length > 0 ? projectsList : fallbackProjects;
+  const isAr = lang === 'ar';
+
+  // Dynamic variables resolved from CMS SEO settings
+  const targetExpYears = parseInt(seo?.hero_experience_years || "3") || 3;
+  const targetTechCount = parseInt(seo?.stack_tech_count || "8") || 8;
+
+  // GSAP Animations with context revert cleanup (rebuilds when language, projects, or statistics change)
+  useEffect(() => {
+    if (!mounted) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // 1. Hero word stagger animations
+      gsap.fromTo(".hero-word",
+        { y: 70, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          stagger: 0.12,
+          duration: 0.9,
+          ease: "power3.out"
+        }
+      );
+
+      // 2. Separator hairline drawings
+      const separators = gsap.utils.toArray(".hairline-separator");
+      separators.forEach((sep: any) => {
+        gsap.fromTo(sep,
+          { scaleX: 0 },
+          {
+            scaleX: 1,
+            duration: 1.0,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: sep,
+              start: "top 95%",
+              toggleActions: "play none none none"
+            }
+          }
+        );
+      });
+
+      // 3. Stat counters count up
+      const statsObj = { projects: 0, years: 0 };
+      gsap.to(statsObj, {
+        projects: activeProjects.length,
+        years: targetExpYears,
+        duration: 1.8,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: "#hero-stats",
+          start: "top 95%",
+        },
+        onUpdate: () => {
+          const elProj = document.getElementById("stat-projects");
+          const elYears = document.getElementById("stat-years");
+          const numP = Math.floor(statsObj.projects);
+          const numY = Math.floor(statsObj.years);
+          if (elProj) elProj.innerText = isAr ? toEastArabic(numP) : String(numP);
+          if (elYears) elYears.innerText = isAr ? toEastArabic(numY) : String(numY);
+        }
+      });
+
+      // 4. Tech stack counter count up
+      const stackObj = { tech: 0 };
+      gsap.to(stackObj, {
+        tech: targetTechCount,
+        duration: 1.6,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: "#stack-stat-trigger",
+          start: "top 95%",
+        },
+        onUpdate: () => {
+          const elTech = document.getElementById("stat-tech");
+          const numT = Math.floor(stackObj.tech);
+          if (elTech) elTech.innerText = isAr ? toEastArabic(numT) : String(numT);
+        }
+      });
+
+      // 5. Tech stack list staggered reveal
+      gsap.fromTo(".stack-item",
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.08,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: "#stack-items-container",
+            start: "top 85%",
+          }
+        }
+      );
+
+      // 6. General editorial sections fade-in on scroll
+      const sections = gsap.utils.toArray(".editorial-section");
+      sections.forEach((sec: any) => {
+        gsap.fromTo(sec,
+          { opacity: 0 },
+          {
+            opacity: 1,
+            duration: 1.0,
+            ease: "none",
+            scrollTrigger: {
+              trigger: sec,
+              start: "top 80%",
+              end: "top 20%",
+              scrub: true
+            }
+          }
+        );
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [mounted, activeProjects, lang, targetExpYears, targetTechCount]);
 
   const toggleLang = () => {
     const n = lang === 'ar' ? 'en' : 'ar';
@@ -160,293 +297,480 @@ function GlobalPortfolio() {
     window.dispatchEvent(new Event('lang-change'));
   };
 
-  const toggleTheme = () => {
-    const n = theme === 'dark' ? 'light' : 'dark';
-    setTheme(n);
-    localStorage.setItem('sk_theme', n);
-    window.dispatchEvent(new Event('theme-change'));
-  };
+  if (!mounted) return null;
 
-  const isAr = lang === 'ar';
-  const isDark = theme === 'dark';
+  // Title strings
+  const nameText = isAr ? (seo?.name_ar || "سالمين هادي") : (seo?.name_en || "Salmeen Hadi");
+  const fullTitle = isAr ? (seo?.title_ar || "مدير منتجات الذكاء الاصطناعي") : (seo?.title_en || "AI Product Manager");
+  
+  // Split title dynamically in half for the 3-line luxury typography
+  const titleParts = fullTitle.split(" ");
+  const line2Words = titleParts.slice(0, Math.ceil(titleParts.length / 2));
+  const line3Words = titleParts.slice(Math.ceil(titleParts.length / 2));
 
-  const [authorized, setAuthorized] = useState(true);
-  const [passcode, setPasscode] = useState("");
-  const [passcodeError, setPasscodeError] = useState("");
+  const whatsappNumber = seo?.whatsapp_number || "966503026795";
+  const whatsappUrl = `https://wa.me/${whatsappNumber}`;
+  
+  const aboutText = isAr 
+    ? (seo?.subtitle_ar || "مطوّر Full-Stack وصاحب أورا للتسويق الرقمي في مكة المكرمة. أدمج الذكاء الاصطناعي مع التطوير لبناء منتجات عربية حقيقية.")
+    : (seo?.subtitle_en || "Full-Stack developer and founder of Aura Digital Marketing in Makkah. I integrate AI with development to build authentic products.");
 
-  useEffect(() => {
-    if (localStorage.getItem('portfolio_auth_salmeen') === 'true') {
-      setAuthorized(true);
+  // Navigation Links
+  const navProjectsText = isAr ? (seo?.nav_projects_ar || "مشاريع") : (seo?.nav_projects_en || "Projects");
+  const navCertificatesText = isAr ? (seo?.nav_certificates_ar || "الشهادات") : (seo?.nav_certificates_en || "Certificates");
+  const navAboutText = isAr ? (seo?.nav_about_ar || "عني") : (seo?.nav_about_en || "About");
+  const navContactText = isAr ? (seo?.nav_contact_ar || "تواصل معي") : (seo?.nav_contact_en || "Contact");
+
+  // Hero labels
+  const heroTopText = isAr ? (seo?.hero_top_label_ar || "مدير منتجات الذكاء الاصطناعي — مكة المكرمة") : (seo?.hero_top_label_en || "AI Product Manager — Makkah");
+  const statProjectsText = isAr ? (seo?.hero_projects_label_ar || "مشاريع منجزة") : (seo?.hero_projects_label_en || "Projects Completed");
+  const statExperienceText = isAr ? (seo?.hero_experience_label_ar || "سنوات من الخبرة") : (seo?.hero_experience_label_en || "Years of Experience");
+
+  // Skill tags list
+  let skillTags = ["Next.js", "Cloudflare", "n8n", "GSAP", "Laravel", "Arabic NLP"];
+  if (seo?.about_skills_list) {
+    try {
+      const parsed = typeof seo.about_skills_list === 'string' ? JSON.parse(seo.about_skills_list) : seo.about_skills_list;
+      if (Array.isArray(parsed)) {
+        skillTags = parsed;
+      }
+    } catch (e) {
+      if (typeof seo.about_skills_list === 'string') {
+        skillTags = seo.about_skills_list.split(',').map((s: string) => s.trim());
+      }
     }
-  }, []);
-
-  const handleVerify = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passcode.trim() === 'salmen13') {
-      localStorage.setItem('portfolio_auth_salmeen', 'true');
-      setAuthorized(true);
-    } else {
-      setPasscodeError(isAr ? 'رمز مرور خاطئ، يرجى المحاولة مرة أخرى.' : 'Incorrect passcode, please try again.');
-    }
-  };
-
-  if(!mounted) return null;
-
-  if (false) {
-    return (
-      <div className={`fixed inset-0 z-[9999] flex items-center justify-center ${isDark ? 'bg-[#050505]' : 'bg-[#F9F8F6]'} overflow-hidden`} dir={isAr ? 'rtl' : 'ltr'}>
-        <ParticleNetwork />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-[#A1824A]/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
-        
-        <div className={`flex flex-col gap-6 p-7 md:p-8 max-w-sm w-full mx-4 rounded-[28px] border shadow-[0_12px_40px_rgba(0,0,0,0.15)] ${
-          isDark ? 'border-white/10 bg-black/40 text-white' : 'border-stone-200 bg-white text-stone-900'
-        } backdrop-blur-xl text-center relative z-10`}>
-          <div className="flex justify-center">
-            <div className="w-14 h-14 bg-[#A1824A]/10 border border-[#A1824A]/30 rounded-full flex items-center justify-center text-[#A1824A] shadow-[0_0_20px_rgba(161,130,74,0.15)]">
-              <Lock size={22} className="animate-pulse" />
-            </div>
-          </div>
-          
-          <div className="space-y-1.5">
-            <h2 className={`text-xl font-bold leading-tight ${isDark ? 'text-white' : 'text-stone-900'} pb-1`}>
-              {isAr ? 'موقع خاص برمز مرور' : 'Passcode Protected'}
-            </h2>
-            <p className={`text-[11px] ${isDark ? 'text-stone-400' : 'text-stone-500'} leading-relaxed px-2`}>
-              {isAr 
-                ? 'هذا المعرض محمي. يرجى إدخال رمز المرور الخاص بسالمين للمتابعة.' 
-                : 'This portfolio is protected. Please enter Salmeen\'s passcode to proceed.'}
-            </p>
-          </div>
-          
-          <form onSubmit={handleVerify} className="space-y-4">
-            <div className="space-y-1">
-              <input
-                type="password"
-                value={passcode}
-                onChange={(e) => { setPasscode(e.target.value); setPasscodeError(""); }}
-                placeholder={isAr ? 'رمز المرور...' : 'Passcode...'}
-                className={`w-full px-5 py-3 rounded-full text-center text-sm font-bold border transition-all duration-300 outline-none focus:ring-2 ${
-                  isDark 
-                    ? 'bg-white/5 border-white/10 text-white placeholder-stone-500 focus:border-[#A1824A] focus:ring-[#A1824A]/30' 
-                    : 'bg-stone-50 border-stone-200 text-stone-900 placeholder-stone-400 focus:border-[#A1824A] focus:ring-[#A1824A]/20'
-                }`}
-                autoFocus
-              />
-              {passcodeError && (
-                <p className="text-[10px] text-red-500 font-bold mt-1.5">
-                  {passcodeError}
-                </p>
-              )}
-            </div>
-            
-            <button
-              type="submit"
-              className="w-full py-3 rounded-full bg-[#A1824A] hover:bg-[#8c6d32] text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 shadow-[0_4px_15px_rgba(161,130,74,0.2)] cursor-pointer"
-            >
-              {isAr ? 'دخول' : 'Access'}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
   }
 
+  // Projects headers
+  const projectsHeaderText = isAr ? (seo?.projects_header_ar || "معرض المنتجات") : (seo?.projects_header_en || "Product Showcase");
+  const projectsArchiveText = isAr ? (seo?.projects_archive_link_ar || "عرض التفاصيل الكاملة ←") : (seo?.projects_archive_link_en || "View Full Archive →");
+
+  // Stack tools list
+  const defaultTechStack = [
+    { ar: "Next.js (إطار عمل الويب الأساسي)", en: "NEXT.JS FRAMEWORK" },
+    { ar: "Tailwind CSS (تنسيق وتصميم الواجهات)", en: "TAILWIND CSS ENGINE" },
+    { ar: "Cloudflare Workers (القطع البرمجية الطرفية)", en: "CLOUDFLARE WORKERS" },
+    { ar: "n8n (أتمتة العمليات وربط الأنظمة)", en: "N8N AUTOMATION WORKFLOWS" },
+    { ar: "GSAP (الحركة التفاعلية الفاخرة)", en: "GREENSOCK ANIMATION PLATFORM" },
+    { ar: "Supabase / PostgreSQL (إدارة البيانات والهويات)", en: "SUPABASE POSTGRESQL" },
+    { ar: "Python / NLP (معالجة اللغات الطبيعية)", en: "PYTHON ARABIC NLP" },
+    { ar: "TypeScript (الكتابة البرمجية الآمنة)", en: "TYPESCRIPT LANG" }
+  ];
+
+  let techStack = defaultTechStack;
+  if (seo?.stack_list_ar || seo?.stack_list_en) {
+    try {
+      const arParsed = typeof seo.stack_list_ar === 'string' ? JSON.parse(seo.stack_list_ar) : seo.stack_list_ar;
+      const enParsed = typeof seo.stack_list_en === 'string' ? JSON.parse(seo.stack_list_en) : seo.stack_list_en;
+      if (Array.isArray(arParsed) && Array.isArray(enParsed)) {
+        techStack = arParsed.map((arVal: string, idx: number) => ({
+          ar: arVal,
+          en: enParsed[idx] || arVal.toUpperCase()
+        }));
+      }
+    } catch (e) {
+      // Keep default
+    }
+  }
+
+  const stackHeaderText = isAr ? (seo?.stack_header_ar || "أدواتي") : (seo?.stack_header_en || "My Stack");
+  const stackTechText = isAr ? (seo?.stack_tech_label_ar || "تقنية") : (seo?.stack_tech_label_en || "Tech");
+
+  // Contact options
+  const contactHeaderText = isAr ? (seo?.contact_header_ar || "لنبني شيئًا يستحق.") : (seo?.contact_header_en || "Let's build something meaningful.");
+  const contactEmailVal = seo?.contact_email || "shssk.16@gmail.com";
+  const contactLinkedinVal = seo?.contact_linkedin || "https://linkedin.com/in/salmeen-hadi";
+  const contactGithubVal = seo?.contact_github || "";
+  const footerLocationText = isAr ? (seo?.footer_location_ar || "مكة المكرمة، المملكة العربية السعودية") : (seo?.footer_location_en || "Makkah, Saudi Arabia");
+
+  const ownerFirstName = nameText.split(" ")[0];
+
   return (
-    <motion.main 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      transition={{ duration: 0.7 }} 
-      className={`min-h-[100dvh] ${isDark ? 'bg-[#050505] text-white' : 'bg-[#F9F8F6] text-[#15110E]'} flex flex-col relative overflow-hidden ${isAr ? 'font-alexandria' : 'font-sans'} transition-colors duration-700`} 
-      dir={isAr ? 'rtl' : 'ltr'}
+    <div 
+      ref={containerRef} 
+      className="bg-[#0D0D0D] text-[#EDE8DC] min-h-screen flex flex-col font-sans select-none overflow-x-hidden"
+      dir={isAr ? "rtl" : "ltr"}
     >
-      {/* Cinematic Loading screen */}
-      <AnimatePresence>
-        {loading && (
-          <motion.div 
-            exit={{ opacity: 0, filter: 'blur(20px)', scale: 1.1 }} 
-            transition={{ duration: 0.8, ease: "easeInOut" }} 
-            className={`fixed inset-0 z-[999] ${isDark ? 'bg-[#050505]' : 'bg-[#F9F8F6]'} flex items-center justify-center`}
-          >
-            <motion.div 
-              initial={{ scale: 0.8, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              transition={{ duration: 0.8, ease: "easeOut" }} 
-              className="relative flex items-center justify-center"
+      {/* 1. NAV */}
+      <nav 
+        className={`fixed top-0 left-0 right-0 z-50 h-20 transition-all duration-300 border-b border-white/5 flex items-center ${
+          scrolled ? "bg-[#0D0D0D]/90 backdrop-blur-md" : "bg-transparent"
+        }`}
+        role="navigation"
+        aria-label={isAr ? "الملاحة الرئيسية" : "Main Navigation"}
+      >
+        <div className="max-w-7xl mx-auto w-full px-6 md:px-12 flex justify-between items-center">
+          {/* Logo */}
+          <div className="font-display text-2xl md:text-3xl font-bold text-start">
+            <Link href="/" aria-label={isAr ? "الرئيسية" : "Home"}>{ownerFirstName}</Link>
+          </div>
+
+          {/* Links Center */}
+          <div className="hidden md:flex gap-8 text-sm uppercase tracking-widest font-mono-en">
+            <Link href="/portfolio" className="hover:text-[#C8A96E] transition-colors duration-300">
+              {navProjectsText}
+            </Link>
+            <Link href="/certificates" className="hover:text-[#C8A96E] transition-colors duration-300">
+              {navCertificatesText}
+            </Link>
+            <a href="#about" className="hover:text-[#C8A96E] transition-colors duration-300">
+              {navAboutText}
+            </a>
+          </div>
+
+          {/* Left CTA / Language Toggle & Menu Toggle */}
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={toggleLang} 
+              className="hover:text-[#C8A96E] transition-colors duration-300 cursor-pointer font-bold font-mono-en text-xs uppercase tracking-widest"
             >
-              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="absolute w-[180px] h-[180px] border-t-2 border-r-2 border-[#A1824A] rounded-full opacity-80 shadow-[0_0_30px_rgba(161,130,74,0.3)]"></motion.div>
-              <motion.div animate={{ rotate: -360 }} transition={{ repeat: Infinity, duration: 3, ease: "linear" }} className={`absolute w-[130px] h-[130px] border-b-2 border-l-2 ${isDark ? 'border-white/20' : 'border-[#15110E]/20'} rounded-full`}></motion.div>
-              <span className={`text-4xl md:text-5xl font-black tracking-[0.3em] ${isDark ? 'text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'text-[#15110E] drop-shadow-md'}`}>SK<span className="text-[#A1824A]">.</span></span>
+              {isAr ? "ENGLISH" : "عربي"}
+            </button>
+            <a 
+              href={whatsappUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hidden md:block border border-[#C8A96E] text-[#C8A96E] px-5 py-2 text-xs md:text-sm font-mono-en uppercase tracking-widest hover:bg-[#C8A96E] hover:text-[#0D0D0D] transition-all duration-300"
+            >
+              {navContactText}
+            </a>
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden text-[#EDE8DC] hover:text-[#C8A96E] transition-colors p-1"
+              aria-label="Toggle Menu"
+            >
+              <Menu size={24} />
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Navigation Drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="keep-rounds fixed inset-0 z-[100] bg-black/85 backdrop-blur-md md:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <motion.div
+              initial={{ x: isAr ? "100%" : "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: isAr ? "100%" : "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="keep-rounds absolute top-0 bottom-0 w-72 max-w-[80vw] bg-[#0D0D0D] border-x border-white/5 p-6 flex flex-col justify-between"
+              style={{ [isAr ? 'right' : 'left']: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="space-y-8">
+                <div className="flex justify-between items-center">
+                  <span className="font-display text-xl font-bold text-white">{ownerFirstName}</span>
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)} 
+                    className="text-white hover:text-[#C8A96E] transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-6 text-sm uppercase tracking-wider font-mono-en" dir={isAr ? "rtl" : "ltr"}>
+                  <Link 
+                    href="/portfolio" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C8A96E] transition-colors py-2 border-b border-white/5 text-start"
+                  >
+                    {navProjectsText}
+                  </Link>
+                  <Link 
+                    href="/certificates" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C8A96E] transition-colors py-2 border-b border-white/5 text-start"
+                  >
+                    {navCertificatesText}
+                  </Link>
+                  <a 
+                    href="#about" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="hover:text-[#C8A96E] transition-colors py-2 border-b border-white/5 text-start"
+                  >
+                    {navAboutText}
+                  </a>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <button 
+                  onClick={() => { toggleLang(); setMobileMenuOpen(false); }}
+                  className="w-full text-center hover:text-[#C8A96E] transition-colors py-3 border border-white/10 font-bold font-mono-en text-xs uppercase tracking-widest"
+                >
+                  {isAr ? "ENGLISH" : "عربي"}
+                </button>
+                <a 
+                  href={whatsappUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block text-center border border-[#C8A96E] text-[#C8A96E] py-3 text-xs font-mono-en uppercase tracking-widest hover:bg-[#C8A96E] hover:text-[#0D0D0D] transition-all duration-300"
+                >
+                  {navContactText}
+                </a>
+              </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <ParticleNetwork />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-[#A1824A]/10 blur-[100px] md:blur-[150px] rounded-full pointer-events-none -z-10"></div>
-
-      {/* Premium UI/UX Nav bar */}
-      <nav className={`w-full h-20 z-50 px-4 md:px-12 flex items-center justify-between border-b ${
-        isDark ? 'border-white/5 bg-[#050505]/65' : 'border-stone-200/50 bg-white/65'
-      } backdrop-blur-xl absolute top-0 transition-colors duration-700`}>
-        <div className="text-lg sm:text-xl md:text-2xl font-black tracking-widest shrink-0">
-          {isAr ? 'سالمين' : 'SALMEEN'}
-          <span className="text-[#A1824A]">.</span>
+      {/* 2. HERO */}
+      <section 
+        id="hero" 
+        className="min-h-screen pt-28 flex flex-col justify-between px-6 md:px-12 max-w-7xl mx-auto w-full"
+      >
+        {/* Top Label */}
+        <div className="flex justify-between items-start w-full pt-8 font-mono-en text-xs uppercase tracking-widest text-[#C8A96E]/80 text-start">
+          <div>{heroTopText}</div>
         </div>
-        
-        <div className="flex gap-2 sm:gap-3 items-center shrink-0">
-          <Link 
-            href="/portfolio" 
-            className="flex items-center gap-2 bg-[#A1824A] hover:bg-[#8c6d32] text-black px-5 sm:px-6 py-3 rounded-full text-xs sm:text-sm font-black shadow-[0_4px_15px_rgba(161,130,74,0.25)] hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300"
-          >
-            <Sparkles size={14} />
-            <span>{isAr ? 'معرض الأعمال' : 'Portfolio'}</span>
-          </Link>
-          
-          <Link 
-            href="/certificates" 
-            className={`flex items-center gap-2 text-xs sm:text-sm font-black px-5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
-              isDark 
-                ? 'text-stone-300 hover:text-white hover:bg-white/5 bg-white/5 border-white/10' 
-                : 'text-stone-600 hover:text-black hover:bg-stone-50 bg-white border-stone-200'
-            }`}
-          >
-            <Award size={14} />
-            <span>{isAr ? "الشهادات" : "Certificates"}</span>
-          </Link>
-          
-          <button 
-            onClick={toggleLang} 
-            className={`border px-4 sm:px-5 py-3 rounded-full text-xs sm:text-sm font-black shadow-sm hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#A1824A]/40 cursor-pointer ${
-              isDark ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-white text-black border-stone-200 hover:bg-stone-50'
-            }`}
-          >
-            {isAr ? 'EN' : 'عربي'}
-          </button>
-          
-          <button 
-            onClick={toggleTheme} 
-            className={`border p-3 rounded-full shadow-sm hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#A1824A]/40 cursor-pointer ${
-              isDark ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-[#15110E] text-white border-[#15110E] hover:bg-black'
-            }`}
-            title="Toggle Theme"
-          >
-            {isDark ? <Sun size={15} /> : <Moon size={15} />}
-          </button>
+
+        {/* 3-Line Headline */}
+        <div className="flex-1 flex flex-col justify-center py-12 text-start">
+          {/* Line 1: Name */}
+          <h1 className="text-[10vw] md:text-[6vw] font-display font-bold leading-none tracking-tight text-white mb-2">
+            {nameText.split(" ").map((word, wIdx) => (
+              <span key={wIdx} className={`inline-block overflow-hidden py-1 ${isAr ? 'ml-4 last:ml-0' : 'mr-4 last:mr-0'}`}>
+                <span className="hero-word inline-block">{word}</span>
+              </span>
+            ))}
+          </h1>
+          {/* Line 2: First half of role */}
+          <h1 className="text-[10vw] md:text-[6vw] font-display font-bold leading-none tracking-tight text-[#C8A96E] mb-2">
+            {line2Words.map((word, wIdx) => (
+              <span key={wIdx} className={`inline-block overflow-hidden py-1 ${isAr ? 'ml-4 last:ml-0' : 'mr-4 last:mr-0'}`}>
+                <span className="hero-word inline-block">{word}</span>
+              </span>
+            ))}
+          </h1>
+          {/* Line 3: Second half of role */}
+          <h1 className="text-[10vw] md:text-[6vw] font-display font-bold leading-none tracking-tight text-white/90">
+            {line3Words.map((word, wIdx) => (
+              <span key={wIdx} className={`inline-block overflow-hidden py-1 ${isAr ? 'ml-4 last:ml-0' : 'mr-4 last:mr-0'}`}>
+                <span className="hero-word inline-block">{word}</span>
+              </span>
+            ))}
+          </h1>
         </div>
-      </nav>
 
-      {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-center px-4 md:px-6 text-center z-10 pt-20 md:pt-24 pb-12 md:pb-16 min-h-[100dvh]">
-        <AnimatePresence mode="wait">
-          <motion.div 
-            key={lang} 
-            initial="hidden" 
-            animate="visible" 
-            exit={{ opacity: 0, filter: 'blur(10px)', y: -20 }} 
-            variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.15 } } }} 
-            className="max-w-4xl mx-auto flex flex-col items-center w-full gap-5 md:gap-6"
-          >
-            <motion.div 
-              variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} 
-              className={`px-4 md:px-5 py-1.5 md:py-2 rounded-full border text-[10px] md:text-xs font-black tracking-widest flex items-center gap-2 uppercase transition-colors duration-300 ${
-                isDark ? 'bg-[#A1824A]/10 border-[#A1824A]/30 text-[#A1824A]' : 'bg-white border-[#A1824A]/30 shadow-sm text-[#A1824A]'
-              }`}
-            >
-              <Sparkles size={12} />
-              <span>{isAr ? heroData.title_ar : heroData.title_en}</span>
-            </motion.div>
-            
-            <motion.h1 
-              variants={{ hidden: { opacity: 0, scale: 0.96 }, visible: { opacity: 1, scale: 1 } }} 
-              className={`text-4xl sm:text-5xl md:text-7xl lg:text-[6.5rem] font-black text-transparent bg-clip-text bg-gradient-to-b overflow-visible leading-[1.3] pb-[0.1em] pt-2 ${
-                isDark ? 'from-white to-stone-400' : 'from-[#15110E] to-stone-500'
-              }`}
-            >
-              {isAr ? heroData.name_ar : heroData.name_en}
-            </motion.h1>
-            
-            <motion.p 
-              variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} 
-              className={`font-medium text-sm md:text-base lg:text-lg max-w-xl leading-[1.9] md:leading-[2] px-4 md:px-0 transition-colors duration-300 mt-4 md:mt-5 ${
-                isDark ? 'text-stone-400' : 'text-stone-600'
-              }`}
-            >
-              {isAr ? heroData.subtitle_ar : heroData.subtitle_en}
-            </motion.p>
-            
-            <motion.div 
-              variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} 
-              className="flex flex-wrap items-center justify-center gap-4 mt-6 md:mt-8"
-            >
-              <a 
-                href={`https://wa.me/${cleanNumber(heroData.whatsapp_number)}`} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className={`relative group px-5 sm:px-6 py-3 rounded-full font-black text-xs sm:text-sm flex items-center gap-2 sm:gap-2.5 overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] shadow-[0_4px_20px_rgba(37,211,102,0.15)] ${
-                  isDark ? 'bg-white text-black' : 'bg-[#15110E] text-white'
-                }`}
-              >
-                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#25D366] to-[#128C7E] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
-                <span className="relative z-10 flex items-center gap-2 group-hover:text-white">
-                  <Phone size={16} />
-                  <span>{isAr ? 'تواصل معي مباشرة' : 'Contact Me Directly'}</span>
-                  {isAr ? <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" /> : <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />}
-                </span>
-              </a>
-            </motion.div>
-            
-            {(() => {
-              const activeLogos = logosData.filter(u => !brokenLogos[u]);
-              if (activeLogos.length === 0) return null;
-              const baseLogos = repeatLogosToMin(activeLogos, 20);
-              const duplicatedLogos = [...baseLogos, ...baseLogos];
-              return (
-                <motion.div 
-                  variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} 
-                  className="w-full max-w-3xl mt-12 md:mt-16 space-y-4"
-                >
-                  <p className={`text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] ${
-                    isDark ? 'text-stone-500' : 'text-stone-400'
-                  }`}>
-                    {isAr ? 'شراكات وتجارب عمل ناجحة' : 'Trusted by & Collaborations'}
-                  </p>
-                  
-                  <div className="relative overflow-hidden w-full py-2">
-                    {/* Fade Gradients */}
-                    <div className={`absolute left-0 top-0 bottom-0 w-8 md:w-16 z-20 pointer-events-none bg-gradient-to-r ${
-                      isDark ? 'from-[#050505] to-transparent' : 'from-[#F9F8F6] to-transparent'
-                    }`} />
-                    <div className={`absolute right-0 top-0 bottom-0 w-8 md:w-16 z-20 pointer-events-none bg-gradient-to-l ${
-                      isDark ? 'from-[#050505] to-transparent' : 'from-[#F9F8F6] to-transparent'
-                    }`} />
-
-                    <div className="marquee-container overflow-hidden w-full" dir="ltr">
-                      <div className="animate-marquee-infinite flex gap-10 md:gap-16 items-center">
-                        {duplicatedLogos.map((u, i) => (
-                          <img 
-                            key={i} 
-                            src={u} 
-                            alt="trust client logo"
-                            onError={() => setBrokenLogos(prev => ({ ...prev, [u]: true }))}
-                            className={`h-5 md:h-7 max-w-[85px] md:max-w-[115px] object-contain transition-all duration-500 shrink-0 ${
-                              isDark 
-                                ? 'filter brightness-0 invert opacity-30 hover:opacity-85 hover:scale-105' 
-                                : 'filter brightness-0 opacity-40 hover:opacity-90 hover:scale-105'
-                            }`} 
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })()}
-          </motion.div>
-        </AnimatePresence>
+        {/* Bottom stats and hairline */}
+        <div className="pb-12" id="hero-stats">
+          <div className="flex gap-8 md:gap-16 mb-8 text-start">
+            <div>
+              <div className="text-6xl md:text-7xl font-display font-bold text-[#C8A96E] leading-none">
+                <span id="stat-projects">٠</span>
+              </div>
+              <p className="text-xs uppercase tracking-widest font-mono-en text-white/50 mt-2">
+                {statProjectsText}
+              </p>
+            </div>
+            <div>
+              <div className="text-6xl md:text-7xl font-display font-bold text-[#C8A96E] leading-none">
+                <span id="stat-years">٠</span>
+              </div>
+              <p className="text-xs uppercase tracking-widest font-mono-en text-white/50 mt-2">
+                {statExperienceText}
+              </p>
+            </div>
+          </div>
+          <div className="hairline-separator"></div>
+        </div>
       </section>
 
-      
+      {/* 3. ABOUT */}
+      <section 
+        id="about" 
+        className="editorial-section py-24 px-6 md:px-12 max-w-7xl mx-auto w-full"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start text-start">
+          {/* Left Columns (60%) */}
+          <div className="md:col-span-7">
+            <p className="text-2xl md:text-3xl font-sans font-light leading-relaxed text-[#EDE8DC]">
+              {aboutText}
+            </p>
+          </div>
+
+          {/* Right Columns (40%) */}
+          <div className="md:col-span-5 w-full">
+            <div className="flex flex-col border-t border-white/10 w-full">
+              {skillTags.map((tag, idx) => (
+                <div 
+                  key={idx} 
+                  className="py-4 border-b border-white/10 text-base font-mono-en text-white/80 tracking-widest text-start"
+                >
+                  {tag}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="hairline-separator mt-24"></div>
+      </section>
+
+      {/* 4. PROJECTS */}
+      <section 
+        id="projects" 
+        className="editorial-section py-24 px-6 md:px-12 max-w-7xl mx-auto w-full"
+      >
+        <div className="mb-16 flex justify-between items-baseline">
+          <h2 className="text-sm uppercase tracking-widest font-mono-en text-[#C8A96E]">
+            {projectsHeaderText}
+          </h2>
+          <Link href="/portfolio" className="text-xs font-mono-en uppercase tracking-wider text-[#C8A96E]/60 hover:text-[#C8A96E]">
+            {projectsArchiveText}
+          </Link>
+        </div>
+
+        {/* Flat list */}
+        <div className="flex flex-col w-full">
+          {activeProjects.slice(0, 5).map((project, idx) => (
+            <a 
+              key={idx} 
+              href={project.link || "#"}
+              target={project.link ? "_blank" : undefined}
+              rel={project.link ? "noopener noreferrer" : undefined}
+              className="group py-12 border-b border-white/10 flex flex-col md:flex-row gap-6 md:items-center justify-between transition-colors duration-300 hover:bg-white/[0.01] px-4 cursor-pointer text-start"
+            >
+              <div className="flex gap-8 items-start md:items-center">
+                {/* Num */}
+                <div className="font-mono-en text-5xl md:text-6xl text-[#C8A96E]/40 group-hover:text-[#C8A96E] transition-colors duration-300 shrink-0">
+                  {isAr ? toEastArabic(project.num) : project.num}
+                </div>
+
+                {/* Info */}
+                <div className="space-y-2 text-start">
+                  <h3 className="text-2xl md:text-3xl font-display font-bold text-white relative inline-block">
+                    {isAr ? project.name_ar : project.name_en}
+                    <span className={`absolute bottom-0 h-[1.5px] bg-[#C8A96E] w-0 group-hover:w-full transition-all duration-300 ${isAr ? 'right-0 origin-right' : 'left-0 origin-left'}`}></span>
+                  </h3>
+                  <p className="text-sm text-[#EDE8DC]/70 max-w-xl">
+                    {isAr ? project.desc_ar : project.desc_en}
+                  </p>
+                </div>
+              </div>
+
+              {/* Tech Stack */}
+              <div className="font-mono-en text-xs uppercase tracking-widest text-[#C8A96E]/80 mt-2 md:mt-0 text-start md:text-end">
+                {project.tech}
+              </div>
+            </a>
+          ))}
+        </div>
+        <div className="hairline-separator mt-24"></div>
+      </section>
+
+      {/* 5. STACK */}
+      <section 
+        id="stack" 
+        className="editorial-section py-24 px-6 md:px-12 max-w-7xl mx-auto w-full"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-baseline text-start" id="stack-stat-trigger">
+          {/* Left Column title and stats */}
+          <div className="md:col-span-5 space-y-6">
+            <h2 className="text-sm uppercase tracking-widest font-mono-en text-[#C8A96E]">
+              {stackHeaderText}
+            </h2>
+            <div className="text-7xl md:text-8xl font-display font-bold text-white leading-none">
+              <span id="stat-tech">٠</span>+ {stackTechText}
+            </div>
+          </div>
+
+          {/* Right Column list */}
+          <div className="md:col-span-7 w-full" id="stack-items-container">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+              {techStack.map((tech, idx) => (
+                <div key={idx} className="stack-item border-b border-white/5 pb-4 space-y-2 text-start">
+                  <div className="text-base text-white font-sans">
+                    {isAr ? tech.ar : tech.en}
+                  </div>
+                  <div className="text-xs text-[#C8A96E]/70 font-mono-en tracking-wider">
+                    {isAr ? tech.en : tech.ar}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="hairline-separator mt-24"></div>
+      </section>
+
+      {/* 6. CONTACT */}
+      <section 
+        id="contact" 
+        className="bg-[#C8A96E] text-[#0D0D0D] py-28 px-6 md:px-12 w-full"
+      >
+        <div className="max-w-7xl mx-auto space-y-16 text-start">
+          <h2 className="text-5xl md:text-8xl font-display font-bold leading-none select-none">
+            {contactHeaderText}
+          </h2>
+
+          <div className="space-y-8 font-mono-en text-xl md:text-2xl font-medium tracking-wide">
+            <div>
+              <a 
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp Salmeen"
+                className="hover:underline transition-all inline-flex items-center gap-3"
+              >
+                {isAr ? "واتساب" : "WhatsApp"}: {isAr ? toEastArabic(whatsappNumber) : whatsappNumber} <span className="font-sans">←</span>
+              </a>
+            </div>
+            <div>
+              <a 
+                href={`mailto:${contactEmailVal}`} 
+                aria-label="Email Salmeen"
+                className="hover:underline transition-all inline-flex items-center gap-3"
+              >
+                {contactEmailVal} <span className="font-sans">←</span>
+              </a>
+            </div>
+            <div>
+              <a 
+                href={contactLinkedinVal} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="LinkedIn Profile"
+                className="hover:underline transition-all inline-flex items-center gap-3"
+              >
+                {contactLinkedinVal.replace(/^https?:\/\/(www\.)?/, '')} <span className="font-sans">←</span>
+              </a>
+            </div>
+            {contactGithubVal && (
+              <div>
+                <a 
+                  href={contactGithubVal} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="GitHub Profile"
+                  className="hover:underline transition-all inline-flex items-center gap-3"
+                >
+                  {contactGithubVal.replace(/^https?:\/\/(www\.)?/, '')} <span className="font-sans">←</span>
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* 7. FOOTER */}
+      <footer className="w-full py-8 border-t border-white/5 px-6 md:px-12 text-xs font-mono-en text-white/40 tracking-wider">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-start md:text-end">
+            {isAr ? `سالمين هادي © ${toEastArabic(2025)}` : "Salmeen Hadi © 2025"}
+          </div>
+          <div className="text-start md:text-end">
+            {footerLocationText}
+          </div>
+        </div>
+      </footer>
       <FloatingChat />
-    </motion.main>
+    </div>
   );
 }

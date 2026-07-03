@@ -2,91 +2,92 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Madani Arabic';
-  src: local('Madani Arabic'), url('https://fonts.cdnfonts.com/s/90089/MadaniArabic-Regular.woff') format('woff');
-  font-display: swap;
+:root {
+  --bg-color: #0D0D0D;
+  --text-color: #EDE8DC;
+  --accent-color: #C8A96E;
+  --divider-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Base Overrides for Salmeen's Editorial Style (Excluding Amal's theme and FloatingChat widgets) */
+html:not(.amal-theme) *:not(.keep-rounds):not(.keep-rounds *) {
+  border-radius: 0px !important;
+  box-shadow: none !important;
 }
 
 html, body {
-  background-color: #F9F8F6;
-  color: #261F1B;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  direction: rtl;
   scroll-behavior: smooth;
   overflow-x: hidden;
+  margin: 0;
+  padding: 0;
 }
 
-/* Step 1 & Step 5: Global typography reset for Arabic (dir=rtl / lang=ar) */
+/* Custom typography fallback matching layout config */
 html[dir="rtl"], :lang(ar), [dir="rtl"] {
-  font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+  font-family: var(--font-ibm-plex-sans-arabic), sans-serif;
   line-height: 1.8;
 }
 
-html[dir="rtl"] body, :lang(ar) body {
-  line-height: 1.8;
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-scheherazade), serif;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
-html[dir="rtl"] h1, :lang(ar) h1 {
-  line-height: 1.4;
-  padding-block-end: 0.15em;
+/* English / Monospace elements */
+.font-mono-en {
+  font-family: var(--font-dm-mono), monospace;
 }
 
-html[dir="rtl"] h2, :lang(ar) h2 {
-  line-height: 1.45;
-  padding-block-end: 0.1em;
+/* GSAP Line Animation Base styles */
+.hairline-separator {
+  width: 100%;
+  height: 1px;
+  background-color: var(--divider-color);
+  transform-origin: right;
 }
 
-html[dir="rtl"] h3, html[dir="rtl"] h4, html[dir="rtl"] h5, html[dir="rtl"] h6,
-:lang(ar) h3, :lang(ar) h4, :lang(ar) h5, :lang(ar) h6 {
-  line-height: 1.5;
+/* Accessibility high contrast states */
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 4px;
 }
 
-html[dir="rtl"] p, html[dir="rtl"] li, html[dir="rtl"] span,
-:lang(ar) p, :lang(ar) li, :lang(ar) span {
-  line-height: 1.8;
-}
-
-/* Any large heading/element with font-size > 2rem */
-html[dir="rtl"] .text-3xl, html[dir="rtl"] .text-4xl, html[dir="rtl"] .text-5xl, html[dir="rtl"] .text-6xl, html[dir="rtl"] .text-7xl, html[dir="rtl"] .text-8xl, html[dir="rtl"] .text-9xl, html[dir="rtl"] .text-\[7rem\],
-:lang(ar) .text-3xl, :lang(ar) .text-4xl, :lang(ar) .text-5xl, :lang(ar) .text-6xl, :lang(ar) .text-7xl, :lang(ar) .text-8xl, :lang(ar) .text-9xl, :lang(ar) .text-\[7rem\],
-html[dir="rtl"] [class*="text-3xl"], html[dir="rtl"] [class*="text-4xl"], html[dir="rtl"] [class*="text-5xl"], html[dir="rtl"] [class*="text-6xl"], html[dir="rtl"] [class*="text-7xl"], html[dir="rtl"] [class*="text-8xl"], html[dir="rtl"] [class*="text-9xl"], html[dir="rtl"] [class*="text-["] {
-  padding-block: 0.1em;
-}
-
-.glass-nav {
-  background: rgba(249, 248, 246, 0.8);
-  backdrop-filter: blur(15px);
-  border-bottom: 1px solid rgba(38, 31, 27, 0.05);
-}
-
-.logo-grid-item {
-  filter: grayscale(100%) contrast(150%) brightness(0.5);
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.logo-grid-item:hover {
-  filter: grayscale(0%) contrast(100%) brightness(1);
-  transform: translateY(-5px);
-}
-
-@keyframes marquee {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
+/* Marquee Animation for Amal's Logo Wall */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .animate-marquee-infinite {
   display: flex;
   width: max-content;
-  gap: 3rem;
-  animation: marquee 25s linear infinite;
+  animation: marquee-scroll 30s linear infinite;
 }
 
-@media (min-width: 768px) {
-  .animate-marquee-infinite {
-    gap: 5rem;
-  }
+/* Hamburger Menu/Drawer Animations */
+@keyframes slide-in-rtl {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(0); }
 }
 
-.animate-marquee-infinite:hover {
-  animation-play-state: paused;
+@keyframes slide-in-ltr {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(0); }
 }
 
+.animate-slide-in-rtl {
+  animation: slide-in-rtl 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in-ltr {
+  animation: slide-in-ltr 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 

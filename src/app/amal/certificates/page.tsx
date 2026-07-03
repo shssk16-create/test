@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ArrowRight, ArrowLeft, Award, Moon, Sun, ZoomIn, X, Lock, Globe, ArrowUpRight } from "lucide-react";
+import { Sparkles, ArrowRight, ArrowLeft, Award, Moon, Sun, ZoomIn, X, Lock, Globe, ArrowUpRight, Menu } from "lucide-react";
 import Link from "next/link";
 import FloatingChat from "@/components/FloatingChat";
 import ParticleNetwork from "@/components/ParticleNetwork";
@@ -126,8 +126,8 @@ export function CertificateCard({
       onClick={handleCardClick}
       className={`group/card relative flex flex-col justify-between h-full rounded-[24px] overflow-hidden border transition-all duration-500 cursor-pointer select-none active:scale-[0.98] active:translate-y-[1px] ${
         isDark 
-          ? 'bg-[#2C3947]/90 border-white/5 text-[#E8EDF2] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_40px_rgba(194,165,109,0.12)]' 
-          : 'bg-white border-[#547A95]/20 text-[#2C3947] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_30px_rgba(194,165,109,0.08)]'
+          ? 'bg-[#2C3947]/90 border-white/5 text-[#E8EDF2] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_40px_rgba(194, 165, 109,0.12)]' 
+          : 'bg-white border-[#547A95]/20 text-[#2C3947] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_30px_rgba(194, 165, 109,0.08)]'
       }`}
     >
       {/* Top Graphic Header: Certificate Image */}
@@ -192,7 +192,7 @@ export function CertificateCard({
             if (skills) {
               try {
                 const parsed = typeof skills === 'string' ? JSON.parse(skills) : skills;
-                if (Array.isArray(parsed) && parsed.length > 0) {
+                if (Array.isArray(parsed)) {
                   skillsList = parsed;
                 }
               } catch (e) {
@@ -228,10 +228,11 @@ export default function AmalCertificates() {
   const basePrefix = isAmalDeploy ? "" : "/amal";
 
   const [lang, setLang] = useState<'ar'|'en'>('ar');
-  const [theme, setTheme] = useState<'dark'|'light'>('dark');
-  const [loading, setLoading] = useState(true);
+  const [theme, setTheme] = useState<'dark'|'light'>('light');
+  const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [selectedImg, setSelectedImg] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useSEO('amal', lang, 'certificates');
 
@@ -261,11 +262,11 @@ export default function AmalCertificates() {
 
   useEffect(() => { 
     setMounted(true); 
+    document.documentElement.classList.add('amal-theme');
     const l = localStorage.getItem('sk_lang'); 
     const th = localStorage.getItem('sk_theme');
     if(l) setLang(l as 'ar'|'en'); 
     if(th) setTheme(th as 'dark'|'light');
-    setTimeout(() => setLoading(false), 1200);
   }, []);
 
   useEffect(() => {
@@ -369,7 +370,7 @@ export default function AmalCertificates() {
           isDark ? 'border-white/10 bg-black/40 text-white' : 'border-[#547A95]/20 bg-[#E8EDF2] text-[#2C3947]'
         } backdrop-blur-xl text-center relative z-10`}>
           <div className="flex justify-center">
-            <div className="w-14 h-14 bg-[#C2A56D]/10 border border-[#C2A56D]/30 rounded-full flex items-center justify-center text-[#C2A56D] shadow-[0_0_20px_rgba(194,165,109,0.15)]">
+            <div className="w-14 h-14 bg-[#C2A56D]/10 border border-[#C2A56D]/30 rounded-full flex items-center justify-center text-[#C2A56D] shadow-[0_0_20px_rgba(194, 165, 109,0.15)]">
               <Lock size={22} className="animate-pulse" />
             </div>
           </div>
@@ -408,7 +409,7 @@ export default function AmalCertificates() {
             
             <button
               type="submit"
-              className="w-full py-3 rounded-full bg-[#C2A56D] hover:bg-[#b39158] text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 shadow-[0_4px_15px_rgba(194,165,109,0.2)] cursor-pointer"
+              className="w-full py-3 rounded-full bg-[#C2A56D] hover:bg-[#b39158] text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 shadow-[0_4px_15px_rgba(194, 165, 109,0.2)] cursor-pointer"
             >
               {isAr ? 'دخول' : 'Access'}
             </button>
@@ -455,26 +456,7 @@ export default function AmalCertificates() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {loading && (
-          <motion.div 
-            exit={{ opacity: 0, filter: 'blur(20px)', scale: 1.1 }} 
-            transition={{ duration: 0.8, ease: "easeInOut" }} 
-            className={`fixed inset-0 z-[999] ${isDark ? 'bg-[#2C3947]' : 'bg-[#E8EDF2]'} flex items-center justify-center`}
-          >
-            <motion.div 
-              initial={{ scale: 0.8, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              transition={{ duration: 0.8, ease: "easeOut" }} 
-              className="relative flex items-center justify-center"
-            >
-              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="absolute w-[180px] h-[180px] border-t-2 border-r-2 border-[#C2A56D] rounded-full opacity-80 shadow-[0_0_30px_rgba(194,165,109,0.3)]"></motion.div>
-              <motion.div animate={{ rotate: -360 }} transition={{ repeat: Infinity, duration: 3, ease: "linear" }} className={`absolute w-[130px] h-[130px] border-b-2 border-l-2 ${isDark ? 'border-white/20' : 'border-[#2C3947]/20'} rounded-full`}></motion.div>
-              <span className={`text-4xl md:text-5xl font-black tracking-[0.3em] ${isDark ? 'text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'text-[#2C3947] drop-shadow-md'}`}>AH<span className="text-[#C2A56D]">.</span></span>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
 
       <div className="absolute top-[-10%] left-[-10%] w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-[#C2A56D]/10 blur-[100px] md:blur-[150px] rounded-full pointer-events-none -z-10"></div>
       
@@ -491,7 +473,7 @@ export default function AmalCertificates() {
           <div className="flex gap-2 sm:gap-3 items-center shrink-0">
             <Link 
               href={basePrefix || "/"} 
-              className={`flex items-center justify-center gap-2 text-xs sm:text-sm font-black w-[115px] sm:w-[145px] px-2 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
+              className={`hidden md:flex items-center justify-center gap-2 text-xs sm:text-sm font-black px-5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
                 isDark 
                   ? 'text-[#E8EDF2]/90 hover:text-white hover:bg-white/5 bg-[#E8EDF2]/10 border-white/10' 
                   : 'text-[#2C3947]/80 hover:text-black hover:bg-[#E8EDF2]/30 bg-white border-[#547A95]/30'
@@ -503,7 +485,7 @@ export default function AmalCertificates() {
             
             <Link 
               href={`${basePrefix}/portfolio`} 
-              className={`flex items-center justify-center gap-2 text-xs sm:text-sm font-black w-[115px] sm:w-[145px] px-2 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
+              className={`hidden md:flex items-center justify-center gap-2 text-xs sm:text-sm font-black px-5 sm:px-6 py-3 rounded-full border transition-all duration-300 shadow-sm active:scale-[0.98] active:translate-y-[1px] ${
                 isDark 
                   ? 'text-[#E8EDF2]/90 hover:text-white hover:bg-white/5 bg-[#E8EDF2]/10 border-white/10' 
                   : 'text-[#2C3947]/80 hover:text-black hover:bg-[#E8EDF2]/30 bg-white border-[#547A95]/30'
@@ -515,7 +497,7 @@ export default function AmalCertificates() {
             
             <button 
               onClick={toggleLang} 
-              className={`flex items-center justify-center border w-[115px] sm:w-[145px] px-2 py-3 rounded-full text-xs sm:text-sm font-black shadow-sm hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C2A56D]/40 cursor-pointer ${
+              className={`border px-3 sm:px-5 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-black shadow-sm hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C2A56D]/40 cursor-pointer ${
                 isDark ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-white text-[#2C3947] border-[#547A95]/30 hover:bg-stone-50'
               }`}
             >
@@ -524,16 +506,95 @@ export default function AmalCertificates() {
             
             <button 
               onClick={toggleTheme} 
-              className={`border p-3 rounded-full shadow-sm hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C2A56D]/40 cursor-pointer ${
+              className={`border p-2.5 sm:p-3 rounded-full shadow-sm hover:scale-[1.02] active:scale-[0.98] active:translate-y-[1px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C2A56D]/40 cursor-pointer ${
                 isDark ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-[#2C3947] text-white border-[#2C3947] hover:bg-black'
               }`}
               title="Toggle Theme"
             >
-              {isDark ? <Sun size={15} /> : <Moon size={15} />}
+              {isDark ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
+
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className={`md:hidden border p-2.5 sm:p-3 rounded-full shadow-sm active:scale-[0.98] transition-all duration-300 focus:outline-none cursor-pointer ${
+                isDark ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-white text-[#2C3947] border-[#547A95]/30 hover:bg-stone-50'
+              }`}
+              title="Toggle Menu"
+            >
+              <Menu size={14} />
             </button>
           </div>
         </div>
       </nav>
+
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="keep-rounds fixed inset-0 z-[100] bg-black/60 backdrop-blur-md md:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <motion.div
+              initial={{ x: isAr ? "100%" : "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: isAr ? "100%" : "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className={`keep-rounds absolute top-0 bottom-0 w-72 max-w-[80vw] p-6 flex flex-col justify-between border-x ${
+                isDark ? 'bg-[#2C3947] border-white/10 text-[#E8EDF2]' : 'bg-[#E8EDF2] border-[#2C3947]/10 text-[#2C3947]'
+              }`}
+              style={{ [isAr ? 'right' : 'left']: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="space-y-8">
+                <div className="flex justify-between items-center">
+                  <span className="text-xl font-black tracking-widest">
+                    {isAr ? 'أمل' : 'AMAL'}<span className="text-[#C2A56D]">.</span>
+                  </span>
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)} 
+                    className={`hover:text-[#C2A56D] transition-colors p-2 rounded-full border ${
+                      isDark ? 'border-white/10 hover:bg-white/5' : 'border-stone-200 hover:bg-stone-50'
+                    }`}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <Link 
+                    href={basePrefix || "/"} 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-center gap-2 px-5 py-4 rounded-full text-xs font-black shadow-sm transition-all duration-300 ${
+                      isDark 
+                        ? 'bg-white/10 text-white border border-white/15 hover:bg-white/20' 
+                        : 'bg-white text-[#2C3947] border border-stone-200 hover:bg-stone-50'
+                    }`}
+                  >
+                    {isAr ? <ArrowRight size={14} className="text-[#C2A56D]" /> : <ArrowLeft size={14} className="text-[#C2A56D]" />}
+                    <span>{isAr ? 'الرئيسية' : 'Home'}</span>
+                  </Link>
+
+                  <Link 
+                    href={`${basePrefix}/portfolio`} 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-center gap-2 text-xs font-black px-5 py-4 rounded-full border transition-all duration-300 shadow-sm ${
+                      isDark 
+                        ? 'text-[#E8EDF2]/90 hover:text-white hover:bg-white/5 bg-[#E8EDF2]/10 border-white/10' 
+                        : 'text-[#2C3947]/80 hover:text-black hover:bg-[#E8EDF2]/30 bg-white border-[#547A95]/30'
+                    }`}
+                  >
+                    <Sparkles size={14} className="text-[#C2A56D]" />
+                    <span>{isAr ? "معرض الأعمال" : "Portfolio"}</span>
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <section className="pt-16 md:pt-24 pb-10 px-4 md:px-6 max-w-7xl mx-auto text-center relative z-10">
         <AnimatePresence mode="wait">
@@ -548,7 +609,7 @@ export default function AmalCertificates() {
       <section className="px-4 md:px-6 max-w-4xl mx-auto z-10 relative mb-12">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
           <div className="flex items-center justify-center mb-6">
-            <span className="px-5 py-2 bg-[#C2A56D] hover:bg-[#b39158] text-black font-black text-xs md:text-sm rounded-full shadow-[0_4px_15px_rgba(194,165,109,0.25)] flex items-center gap-2">
+            <span className="px-5 py-2 bg-[#C2A56D] hover:bg-[#b39158] text-black font-black text-xs md:text-sm rounded-full shadow-[0_4px_15px_rgba(194, 165, 109,0.25)] flex items-center gap-2">
               <Award size={16} /> {isAr ? 'المؤهل الأكاديمي الأساسي' : 'Primary Academic Degree'}
             </span>
           </div>
@@ -557,8 +618,8 @@ export default function AmalCertificates() {
             onClick={() => setSelectedImg(primaryCert.image)}
             className={`w-full flex flex-col md:flex-row rounded-[24px] overflow-hidden border transition-all duration-500 cursor-pointer select-none active:scale-[0.98] active:translate-y-[1px] ${
               isDark 
-                ? 'bg-[#2C3947]/90 border-white/5 text-[#E8EDF2] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_40px_rgba(194,165,109,0.12)]' 
-                : 'bg-white border-[#547A95]/20 text-[#2C3947] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_30px_rgba(194,165,109,0.08)]'
+                ? 'bg-[#2C3947]/90 border-white/5 text-[#E8EDF2] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_40px_rgba(194, 165, 109,0.12)]' 
+                : 'bg-white border-[#547A95]/20 text-[#2C3947] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_30px_rgba(194, 165, 109,0.08)]'
             }`}
           >
             {/* Left Column details */}
@@ -585,11 +646,14 @@ export default function AmalCertificates() {
                 </p>
 
                 {(() => {
-                  let skillsList = ["Software Engineering", "Cloud Computing", "Web Architecture", "Databases", "Distributed Systems"];
+                  let skillsList: string[] = [];
+                  if (primaryCert.id === "cert-primary") {
+                    skillsList = ["Software Engineering", "Cloud Computing", "Web Architecture", "Databases", "Distributed Systems"];
+                  }
                   if (primaryCert.skills) {
                     try {
                       const parsed = typeof primaryCert.skills === 'string' ? JSON.parse(primaryCert.skills) : primaryCert.skills;
-                      if (Array.isArray(parsed) && parsed.length > 0) {
+                      if (Array.isArray(parsed)) {
                         skillsList = parsed;
                       }
                     } catch (e) {
@@ -598,6 +662,7 @@ export default function AmalCertificates() {
                       }
                     }
                   }
+                  if (skillsList.length === 0) return null;
                   return (
                     <div className="flex flex-wrap gap-1.5 mt-2" dir="ltr">
                       {skillsList.map((skill) => (
@@ -623,8 +688,8 @@ export default function AmalCertificates() {
               className="w-full md:w-2/5 h-[220px] md:h-auto overflow-hidden relative flex items-center justify-center p-6"
               style={{
                 background: isDark 
-                  ? `radial-gradient(circle at center, rgba(194,165,109,0.15) 0%, #2C3947 100%)` 
-                  : `radial-gradient(circle at center, rgba(194,165,109,0.05) 0%, #ffffff 100%)`
+                  ? `radial-gradient(circle at center, rgba(194, 165, 109,0.15) 0%, #2C3947 100%)` 
+                  : `radial-gradient(circle at center, rgba(194, 165, 109,0.05) 0%, #ffffff 100%)`
               }}
             >
               {primaryCert.image ? (

@@ -95,10 +95,10 @@ export function CaseStudyCard({
   
   const themeClasses = isDark 
     ? (isAmal 
-        ? 'bg-[#2C3947]/90 border-white/5 text-[#E8EDF2] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_40px_rgba(194,165,109,0.12)]' 
+        ? 'bg-[#2C3947]/90 border-white/5 text-[#E8EDF2] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_40px_rgba(194, 165, 109,0.12)]' 
         : 'bg-[#0a0c10]/85 border-white/5 text-white hover:border-[#A1824A]/40 hover:shadow-[0_12px_40px_rgba(161,130,74,0.12)]') 
     : (isAmal 
-        ? 'bg-white border-[#547A95]/20 text-[#2C3947] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_30px_rgba(194,165,109,0.08)]' 
+        ? 'bg-white border-[#547A95]/20 text-[#2C3947] hover:border-[#C2A56D]/40 hover:shadow-[0_12px_30px_rgba(194, 165, 109,0.08)]' 
         : 'bg-white border-stone-200 text-[#15110E] hover:border-[#A1824A]/40 hover:shadow-[0_12px_30px_rgba(161,130,74,0.08)]');
 
   const containerBorderColor = isDark 
@@ -754,7 +754,7 @@ export function WorksSection({ owner = 'salmeen' }: { owner?: string }) {
               onClick={() => setActiveFilter(option)}
               className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] font-black transition-all duration-300 active:scale-95 active:translate-y-[1px] border cursor-pointer ${
                 activeFilter === option
-                  ? (isAmal ? "bg-[#C2A56D] text-black border-[#C2A56D] shadow-[0_4px_20px_rgba(194,165,109,0.3)]" : "bg-[#A1824A] text-black border-[#A1824A] shadow-[0_4px_20px_rgba(161,130,74,0.3)]")
+                  ? (isAmal ? "bg-[#C2A56D] text-black border-[#C2A56D] shadow-[0_4px_20px_rgba(194, 165, 109,0.3)]" : "bg-[#A1824A] text-black border-[#A1824A] shadow-[0_4px_20px_rgba(161,130,74,0.3)]")
                   : (isDark 
                       ? "bg-white/5 text-zinc-400 border-white/10 hover:border-white/20 hover:text-white"
                       : (isAmal ? "bg-white text-[#2C3947]/70 border-stone-200 hover:border-[#C2A56D] hover:text-[#2C3947]" : "bg-white text-stone-500 border-stone-200 hover:border-[#A1824A] hover:text-[#15110E]"))

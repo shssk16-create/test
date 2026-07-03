@@ -1245,8 +1245,12 @@ const accentRgb = isAmal ? '194, 165, 109' : '161, 130, 74';
                       return <td>{val}</td>;
                     })}
                     <td style="font-size: 12px; color: var(--text-muted);">{new Date(item.created_at).toLocaleDateString()}</td>
-                    <td class="action-links">
+                    <td class="action-links" style="display: flex; gap: 12px; align-items: center;">
                       <a href={`/admin/content/${type}?action=edit&id=${item.id}`}>Edit</a>
+                      <form method="POST" action={`/admin/content/${type}?action=delete&id=${item.id}`} style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this item?')">
+                        <input type="hidden" name="_action" value="delete" />
+                        <button type="submit" style="background: none; border: none; color: var(--danger); font-weight: 600; font-family: inherit; font-size: 13px; cursor: pointer; padding: 0; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Delete</button>
+                      </form>
                     </td>
                   </tr>
                 ))}
@@ -1274,7 +1278,7 @@ const accentRgb = isAmal ? '194, 165, 109' : '161, 130, 74';
     </div>
   </div>
 
-  <script is:inline define:vars={{ apiBase: API_BASE, owner: session }}>
+  <script is:inline define:vars={{ apiBase: API_BASE, owner: session, authToken: session === 'salmeen' ? 'mock_admin_token_salmeen' : 'mock_admin_token_amal' }}>
     const mediaModal = document.getElementById('media-modal');
     const modalGrid = document.getElementById('modal-media-grid');
     const searchInput = document.getElementById('modal-search-input');
@@ -1318,7 +1322,11 @@ const accentRgb = isAmal ? '194, 165, 109' : '161, 130, 74';
     async function loadModalMedia() {
       modalGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">Loading media...</div>';
       try {
-        const res = await fetch(`${apiBase}/api/media?owner=${encodeURIComponent(owner)}`);
+        const res = await fetch(`${apiBase}/api/media?owner=${encodeURIComponent(owner)}`, {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
         const json = await res.json();
         allMediaItems = json.data || [];
         renderModalItems(allMediaItems);

@@ -7,7 +7,7 @@ const isAmalDeploy = process.env.NEXT_PUBLIC_OWNER === 'amal';
 console.log("🛠️ Running post-build processor to correct static HTML titles...");
 
 const htmlFilesToFix = [
-  { file: 'amal.html', title: 'أمل هادي | أخصائية تقنية معلومات' },
+  { file: 'amal.html', title: 'أمل هادي | مديرة تسويق في محطات درب' },
   { file: 'amal/portfolio.html', title: 'أمل هادي | معرض الأعمال' },
   { file: 'amal/certificates.html', title: 'أمل هادي | الشهادات' },
   { file: 'portfolio.html', title: 'سالمين هادي | معرض الأعمال' },

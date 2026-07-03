@@ -13,6 +13,43 @@ export interface SEOData {
   seo_description_ar?: string;
   seo_description_en?: string;
   seo_keywords?: string;
+  whatsapp_number?: string;
+  nav_projects_ar?: string;
+  nav_projects_en?: string;
+  nav_certificates_ar?: string;
+  nav_certificates_en?: string;
+  nav_about_ar?: string;
+  nav_about_en?: string;
+  nav_contact_ar?: string;
+  nav_contact_en?: string;
+  hero_top_label_ar?: string;
+  hero_top_label_en?: string;
+  hero_projects_label_ar?: string;
+  hero_projects_label_en?: string;
+  hero_experience_label_ar?: string;
+  hero_experience_label_en?: string;
+  hero_experience_years?: string;
+  about_skills_header_ar?: string;
+  about_skills_header_en?: string;
+  about_skills_list?: any;
+  projects_header_ar?: string;
+  projects_header_en?: string;
+  projects_archive_link_ar?: string;
+  projects_archive_link_en?: string;
+  stack_header_ar?: string;
+  stack_header_en?: string;
+  stack_tech_label_ar?: string;
+  stack_tech_label_en?: string;
+  stack_tech_count?: string;
+  stack_list_ar?: any;
+  stack_list_en?: any;
+  contact_header_ar?: string;
+  contact_header_en?: string;
+  contact_email?: string;
+  contact_linkedin?: string;
+  contact_github?: string;
+  footer_location_ar?: string;
+  footer_location_en?: string;
 }
 
 export function useSEO(owner: 'amal' | 'salmeen', lang: 'ar' | 'en', pageType: 'home' | 'portfolio' | 'certificates') {
